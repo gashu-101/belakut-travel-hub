@@ -1,4 +1,3 @@
-
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -178,7 +177,7 @@ const AddHotelForm = () => {
                         <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a price range" />
-                            </Trigger>
+                            </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                             {Constants.public.Enums.price_range.map(pr => (
