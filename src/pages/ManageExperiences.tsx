@@ -1,17 +1,21 @@
 
 import { useAuth } from '@/providers/AuthProvider';
 import { Navigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getUserExperiences } from '@/lib/experienceApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Clock, Eye, Star } from 'lucide-react';
+import { MapPin, Clock, Eye, Star, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const ManageExperiences = () => {
   const { session } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   if (!session) {
     return <Navigate to="/auth" replace />;
@@ -20,6 +24,31 @@ const ManageExperiences = () => {
   const { data: experiences, isLoading } = useQuery({
     queryKey: ['user-experiences'],
     queryFn: getUserExperiences,
+  });
+
+  const deleteExperienceMutation = useMutation({
+    mutationFn: async (experienceId: string) => {
+      const { error } = await supabase
+        .from('experiences')
+        .delete()
+        .eq('id', experienceId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-experiences'] });
+      toast({
+        title: "Success",
+        description: "Experience deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete experience",
+        variant: "destructive",
+      });
+    },
   });
 
   if (isLoading) {
@@ -120,12 +149,23 @@ const ManageExperiences = () => {
                     </div>
                   )}
                   
-                  <Button variant="outline" size="sm" className="w-full" asChild>
-                    <Link to={`/experiences/${experience.id}`}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Details
-                    </Link>
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                      <Link to={`/experiences/${experience.id}`}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </Link>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => deleteExperienceMutation.mutate(experience.id)}
+                      disabled={deleteExperienceMutation.isPending}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

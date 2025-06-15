@@ -1,17 +1,21 @@
 
 import { useAuth } from '@/providers/AuthProvider';
 import { Navigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getUserHotels, getHotelBookings } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Hotel, MapPin, Calendar, Users, Eye } from 'lucide-react';
+import { Hotel, MapPin, Calendar, Users, Eye, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const ManageProperties = () => {
   const { session } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   if (!session) {
     return <Navigate to="/auth" replace />;
@@ -20,6 +24,31 @@ const ManageProperties = () => {
   const { data: hotels, isLoading: hotelsLoading } = useQuery({
     queryKey: ['user-hotels'],
     queryFn: getUserHotels,
+  });
+
+  const deleteHotelMutation = useMutation({
+    mutationFn: async (hotelId: string) => {
+      const { error } = await supabase
+        .from('hotels')
+        .delete()
+        .eq('id', hotelId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-hotels'] });
+      toast({
+        title: "Success",
+        description: "Property deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete property",
+        variant: "destructive",
+      });
+    },
   });
 
   if (hotelsLoading) {
@@ -70,7 +99,12 @@ const ManageProperties = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {hotels?.map((hotel) => (
-            <PropertyCard key={hotel.id} hotel={hotel} />
+            <PropertyCard 
+              key={hotel.id} 
+              hotel={hotel} 
+              onDelete={() => deleteHotelMutation.mutate(hotel.id)}
+              isDeleting={deleteHotelMutation.isPending}
+            />
           ))}
         </div>
       )}
@@ -78,7 +112,11 @@ const ManageProperties = () => {
   );
 };
 
-const PropertyCard = ({ hotel }: { hotel: any }) => {
+const PropertyCard = ({ hotel, onDelete, isDeleting }: { 
+  hotel: any; 
+  onDelete: () => void;
+  isDeleting: boolean;
+}) => {
   const { data: bookings } = useQuery({
     queryKey: ['hotel-bookings', hotel.id],
     queryFn: () => getHotelBookings(hotel.id),
@@ -131,12 +169,23 @@ const PropertyCard = ({ hotel }: { hotel: any }) => {
               </div>
             </div>
             
-            <Button variant="outline" size="sm" className="w-full" asChild>
-              <Link to={`/hotels/${hotel.id}`}>
-                <Eye className="h-4 w-4 mr-2" />
-                View Details
-              </Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="flex-1" asChild>
+                <Link to={`/hotels/${hotel.id}`}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onDelete}
+                disabled={isDeleting}
+                className="text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </TabsContent>
           
           <TabsContent value="bookings" className="space-y-2">
