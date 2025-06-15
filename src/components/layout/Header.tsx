@@ -36,7 +36,10 @@ const Header = () => {
             <NavItem to="/hotels">Stays</NavItem>
             <NavItem to="/experiences">Experiences</NavItem>
             {session && (
-              <NavItem to="/manage-properties">Manage Properties</NavItem>
+              <>
+                <NavItem to="/manage-properties">Manage Properties</NavItem>
+                <NavItem to="/manage-experiences">Manage Experiences</NavItem>
+              </>
             )}
           </nav>
         </div>
@@ -61,7 +64,9 @@ const Header = () => {
                 {session && (
                   <>
                     <NavItem to="/add-hotel">Add Property</NavItem>
+                    <NavItem to="/add-experience">Add Experience</NavItem>
                     <NavItem to="/manage-properties">Manage Properties</NavItem>
+                    <NavItem to="/manage-experiences">Manage Experiences</NavItem>
                   </>
                 )}
               </div>

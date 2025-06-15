@@ -12,10 +12,12 @@ import Index from "./pages/Index";
 import Hotels from "./pages/Hotels";
 import HotelDetail from "./pages/HotelDetail";
 import Experiences from "./pages/Experiences";
+import ExperienceDetail from "./pages/ExperienceDetail";
 import Auth from "./pages/Auth";
 import AddHotel from "./pages/AddHotel";
 import AddExperience from "./pages/AddExperience";
 import ManageProperties from "./pages/ManageProperties";
+import ManageExperiences from "./pages/ManageExperiences";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,10 +36,12 @@ const App = () => (
                 <Route path="hotels" element={<Hotels />} />
                 <Route path="hotels/:id" element={<HotelDetail />} />
                 <Route path="experiences" element={<Experiences />} />
+                <Route path="experiences/:id" element={<ExperienceDetail />} />
                 <Route path="auth" element={<Auth />} />
                 <Route path="add-hotel" element={<AddHotel />} />
                 <Route path="add-experience" element={<AddExperience />} />
                 <Route path="manage-properties" element={<ManageProperties />} />
+                <Route path="manage-experiences" element={<ManageExperiences />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
