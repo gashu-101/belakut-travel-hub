@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { InsertHotel } from "./types";
+import { InsertHotel } from "@/types";
 
 export async function getHotels() {
   const { data, error } = await supabase.from("hotels").select("*");
