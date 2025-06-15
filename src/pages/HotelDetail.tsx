@@ -149,7 +149,7 @@ const HotelDetail = () => {
               <BookingDialog hotel={hotel}>
                 <Button size="lg" className="flex-1">Book Now</Button>
               </BookingDialog>
-              <ReviewDialog hotelId={hotel.id}>
+              <ReviewDialog hotel={hotel}>
                 <Button variant="outline" size="lg">Add Review</Button>
               </ReviewDialog>
             </div>
