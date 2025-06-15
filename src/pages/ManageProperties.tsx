@@ -61,7 +61,6 @@ const ManageProperties = () => {
       
       const hotelIds = hotels.map(h => h.id);
       const bookingPromises = hotelIds.map(async (hotelId) => {
-        // Get bookings with user profiles using a single query
         const { data: bookings, error: bookingsError } = await supabase
           .from('bookings')
           .select(`
@@ -77,7 +76,6 @@ const ManageProperties = () => {
           return [];
         }
         
-        // Get hotel names
         const { data: hotelData, error: hotelError } = await supabase
           .from('hotels')
           .select('name')
@@ -89,7 +87,6 @@ const ManageProperties = () => {
           return [];
         }
 
-        // Transform the data to match the expected format
         return bookings.map((booking: any) => ({
           ...booking,
           hotel_name: hotelData?.name || 'Unknown Hotel',
@@ -110,13 +107,13 @@ const ManageProperties = () => {
 
   if (hotelsLoading) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+      <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
+        <h1 className="text-3xl font-bold mb-8 text-foreground">
           Manage Properties
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50">
+            <Card key={i} className="border shadow-lg bg-card">
               <CardHeader>
                 <Skeleton className="h-6 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
@@ -134,25 +131,25 @@ const ManageProperties = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 bg-gradient-to-br from-slate-50 to-white min-h-screen">
+    <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold text-foreground">
           Property Management
         </h1>
-        <Button asChild className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg transform hover:scale-105 transition-all duration-300">
+        <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg transform hover:scale-105 transition-all duration-300">
           <a href="/add-hotel">Add New Property</a>
         </Button>
       </div>
 
       <Tabs defaultValue="properties" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-white shadow-lg border-0 p-1 rounded-xl">
-          <TabsTrigger value="properties" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg transition-all duration-300">
+        <TabsList className="grid w-full grid-cols-2 bg-card shadow-lg border p-1 rounded-xl">
+          <TabsTrigger value="properties" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300">
             My Properties
           </TabsTrigger>
-          <TabsTrigger value="approvals" className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg transition-all duration-300">
+          <TabsTrigger value="approvals" className="relative data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300">
             Pending Approvals
             {allBookings.length > 0 && (
-              <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-gradient-to-r from-red-500 to-red-600 animate-pulse">
+              <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-destructive text-destructive-foreground animate-pulse">
                 {allBookings.length}
               </Badge>
             )}
@@ -161,14 +158,14 @@ const ManageProperties = () => {
 
         <TabsContent value="properties" className="mt-6">
           {hotels?.length === 0 ? (
-            <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50">
+            <Card className="border shadow-lg bg-card">
               <CardContent className="pt-6 text-center">
-                <Hotel className="h-16 w-16 mx-auto mb-4 text-slate-400" />
-                <h3 className="text-xl font-semibold mb-2 text-slate-700">No Properties Yet</h3>
-                <p className="text-slate-500 mb-4">
+                <Hotel className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-xl font-semibold mb-2 text-foreground">No Properties Yet</h3>
+                <p className="text-muted-foreground mb-4">
                   Start by adding your first property to the platform.
                 </p>
-                <Button asChild className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+                <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <a href="/add-hotel">Add Your First Property</a>
                 </Button>
               </CardContent>
@@ -189,21 +186,21 @@ const ManageProperties = () => {
 
         <TabsContent value="approvals" className="mt-6">
           {allBookings.length === 0 ? (
-            <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-orange-50">
+            <Card className="border shadow-lg bg-card">
               <CardContent className="pt-6 text-center">
-                <Bell className="h-16 w-16 mx-auto mb-4 text-slate-400" />
-                <h3 className="text-xl font-semibold mb-2 text-slate-700">No Pending Approvals</h3>
-                <p className="text-slate-500">
+                <Bell className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-xl font-semibold mb-2 text-foreground">No Pending Approvals</h3>
+                <p className="text-muted-foreground">
                   All payments are up to date. New bookings requiring approval will appear here.
                 </p>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-6">
-              <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-200">
-                <Bell className="h-6 w-6 text-orange-600" />
-                <h2 className="text-xl font-semibold text-slate-800">Bookings Awaiting Payment Approval</h2>
-                <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-300">{allBookings.length}</Badge>
+              <div className="flex items-center gap-3 p-4 bg-primary/10 rounded-xl border border-primary/20">
+                <Bell className="h-6 w-6 text-primary" />
+                <h2 className="text-xl font-semibold text-foreground">Bookings Awaiting Payment Approval</h2>
+                <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">{allBookings.length}</Badge>
               </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -233,7 +230,6 @@ const PropertyCard = ({ hotel, onDelete, isDeleting }: {
   const { data: bookings } = useQuery({
     queryKey: ['hotel-bookings', hotel.id],
     queryFn: async () => {
-      // Get bookings with user profiles using a single query
       const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
@@ -247,7 +243,6 @@ const PropertyCard = ({ hotel, onDelete, isDeleting }: {
         return [];
       }
       
-      // Transform the data to match the expected format
       return bookings.map((booking: any) => ({
         ...booking,
         booker_name: booking.profiles 
@@ -263,17 +258,17 @@ const PropertyCard = ({ hotel, onDelete, isDeleting }: {
   const totalRevenue = bookings?.reduce((sum, booking) => sum + (booking.total_amount || 0), 0) || 0;
 
   return (
-    <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
+    <Card className="border shadow-lg bg-card hover:shadow-xl transition-all duration-500 transform hover:scale-105">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-lg text-slate-800">{hotel.name}</CardTitle>
-            <div className="flex items-center gap-1 text-sm text-slate-500 mt-1">
+            <CardTitle className="text-lg text-foreground">{hotel.name}</CardTitle>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
               <MapPin className="h-3 w-3" />
               <span>{hotel.location}</span>
             </div>
           </div>
-          <Badge variant={hotel.rating ? "default" : "secondary"} className={hotel.rating ? "bg-gradient-to-r from-green-500 to-green-600 text-white" : ""}>
+          <Badge variant={hotel.rating ? "default" : "secondary"} className={hotel.rating ? "bg-primary text-primary-foreground" : ""}>
             {hotel.rating ? `${hotel.rating} Stars` : 'No Rating'}
           </Badge>
         </div>
@@ -289,25 +284,25 @@ const PropertyCard = ({ hotel, onDelete, isDeleting }: {
         )}
         
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-slate-100 p-1 rounded-lg">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-md transition-all duration-200">Overview</TabsTrigger>
-            <TabsTrigger value="bookings" className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-md transition-all duration-200">Bookings</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-muted p-1 rounded-lg">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-card data-[state=active]:shadow-md rounded-md transition-all duration-200">Overview</TabsTrigger>
+            <TabsTrigger value="bookings" className="data-[state=active]:bg-card data-[state=active]:shadow-md rounded-md transition-all duration-200">Bookings</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                <div className="text-2xl font-bold text-blue-700">{bookings?.length || 0}</div>
-                <div className="text-xs text-blue-600">Total Bookings</div>
+              <div className="text-center p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <div className="text-2xl font-bold text-primary">{bookings?.length || 0}</div>
+                <div className="text-xs text-primary">Total Bookings</div>
               </div>
-              <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                <div className="text-2xl font-bold text-green-700">{formatETB(totalRevenue)}</div>
-                <div className="text-xs text-green-600">Revenue</div>
+              <div className="text-center p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <div className="text-2xl font-bold text-primary">{formatETB(totalRevenue)}</div>
+                <div className="text-xs text-primary">Revenue</div>
               </div>
             </div>
             
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1 border-slate-300 hover:bg-slate-50" asChild>
+              <Button variant="outline" size="sm" className="flex-1 border-border hover:bg-accent" asChild>
                 <Link to={`/hotels/${hotel.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
                   View Details
@@ -318,7 +313,7 @@ const PropertyCard = ({ hotel, onDelete, isDeleting }: {
                 size="sm" 
                 onClick={onDelete}
                 disabled={isDeleting}
-                className="text-red-600 hover:text-red-700 border-red-300 hover:bg-red-50"
+                className="text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/5"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -329,17 +324,17 @@ const PropertyCard = ({ hotel, onDelete, isDeleting }: {
             {activeBookings.length > 0 ? (
               <div className="space-y-3">
                 {activeBookings.slice(0, 3).map((booking) => (
-                  <div key={booking.id} className="p-3 border border-slate-200 rounded-lg bg-gradient-to-r from-white to-slate-50 shadow-sm">
+                  <div key={booking.id} className="p-3 border border-border rounded-lg bg-card shadow-sm">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium text-slate-700">{new Date(booking.check_in_date).toLocaleDateString()}</span>
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium text-foreground">{new Date(booking.check_in_date).toLocaleDateString()}</span>
                       </div>
-                      <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'} className={booking.status === 'confirmed' ? "bg-green-100 text-green-700 border-green-300" : "bg-yellow-100 text-yellow-700 border-yellow-300"}>
+                      <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'} className={booking.status === 'confirmed' ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}>
                         {booking.status}
                       </Badge>
                     </div>
-                    <div className="space-y-1 text-xs text-slate-600">
+                    <div className="space-y-1 text-xs text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Users className="h-3 w-3" />
                         <span>{booking.guests_count} guests</span>
@@ -360,20 +355,20 @@ const PropertyCard = ({ hotel, onDelete, isDeleting }: {
                           <span>{booking.booker_phone}</span>
                         </div>
                       )}
-                      <div className="font-semibold text-green-600">
+                      <div className="font-semibold text-primary">
                         {formatETB(booking.total_amount || 0)}
                       </div>
                     </div>
                   </div>
                 ))}
                 {activeBookings.length > 3 && (
-                  <div className="text-center text-sm text-slate-500 p-2 bg-slate-50 rounded-lg">
+                  <div className="text-center text-sm text-muted-foreground p-2 bg-muted rounded-lg">
                     +{activeBookings.length - 3} more bookings
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-center text-sm text-slate-500 py-8 bg-slate-50 rounded-lg">
+              <div className="text-center text-sm text-muted-foreground py-8 bg-muted rounded-lg">
                 No active bookings
               </div>
             )}

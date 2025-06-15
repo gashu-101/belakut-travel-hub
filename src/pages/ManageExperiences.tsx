@@ -53,11 +53,11 @@ const ManageExperiences = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-8">Manage Experiences</h1>
+      <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
+        <h1 className="text-3xl font-bold mb-8 text-foreground">Manage Experiences</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
+            <Card key={i} className="border shadow-lg bg-card">
               <CardHeader>
                 <Skeleton className="h-6 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
@@ -75,23 +75,23 @@ const ManageExperiences = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Manage Experiences</h1>
-        <Button asChild>
+        <h1 className="text-3xl font-bold text-foreground">Manage Experiences</h1>
+        <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Link to="/add-experience">Add New Experience</Link>
         </Button>
       </div>
 
       {experiences?.length === 0 ? (
-        <Card>
+        <Card className="border shadow-lg bg-card">
           <CardContent className="pt-6 text-center">
             <Star className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">No Experiences Yet</h3>
+            <h3 className="text-lg font-semibold mb-2 text-foreground">No Experiences Yet</h3>
             <p className="text-muted-foreground mb-4">
               Start by adding your first experience to the platform.
             </p>
-            <Button asChild>
+            <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
               <Link to="/add-experience">Add Your First Experience</Link>
             </Button>
           </CardContent>
@@ -99,11 +99,11 @@ const ManageExperiences = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {experiences?.map((experience) => (
-            <Card key={experience.id}>
+            <Card key={experience.id} className="border shadow-lg bg-card hover:shadow-xl transition-all duration-300 hover:scale-105">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-lg">{experience.name}</CardTitle>
+                    <CardTitle className="text-lg text-foreground">{experience.name}</CardTitle>
                     {experience.location && (
                       <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                         <MapPin className="h-3 w-3" />
@@ -111,7 +111,7 @@ const ManageExperiences = () => {
                       </div>
                     )}
                   </div>
-                  <Badge variant={experience.rating ? "default" : "secondary"}>
+                  <Badge variant={experience.rating ? "default" : "secondary"} className={experience.rating ? "bg-primary text-primary-foreground" : ""}>
                     {experience.rating ? `${experience.rating}★` : 'No Rating'}
                   </Badge>
                 </div>
@@ -122,21 +122,21 @@ const ManageExperiences = () => {
                   <img 
                     src={experience.image} 
                     alt={experience.name}
-                    className="w-full h-32 object-cover rounded-lg mb-4"
+                    className="w-full h-32 object-cover rounded-lg mb-4 shadow-md"
                   />
                 )}
                 
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     {experience.category && (
-                      <div className="text-center p-3 bg-muted rounded-lg">
+                      <div className="text-center p-3 bg-primary/10 rounded-lg border border-primary/20">
                         <div className="text-sm font-medium text-primary">{experience.category}</div>
                         <div className="text-xs text-muted-foreground">Category</div>
                       </div>
                     )}
                     {experience.price_per_guest && (
-                      <div className="text-center p-3 bg-muted rounded-lg">
-                        <div className="text-sm font-bold text-green-600">${experience.price_per_guest}</div>
+                      <div className="text-center p-3 bg-primary/10 rounded-lg border border-primary/20">
+                        <div className="text-sm font-bold text-primary">${experience.price_per_guest}</div>
                         <div className="text-xs text-muted-foreground">Per Guest</div>
                       </div>
                     )}
@@ -150,7 +150,7 @@ const ManageExperiences = () => {
                   )}
                   
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Button variant="outline" size="sm" className="flex-1 border-border hover:bg-accent" asChild>
                       <Link to={`/experiences/${experience.id}`}>
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
@@ -161,7 +161,7 @@ const ManageExperiences = () => {
                       size="sm" 
                       onClick={() => deleteExperienceMutation.mutate(experience.id)}
                       disabled={deleteExperienceMutation.isPending}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/5"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

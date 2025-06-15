@@ -35,7 +35,7 @@ const HotelDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
         <div className="animate-pulse">
           <Skeleton className="h-8 w-64 mb-8" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -53,13 +53,13 @@ const HotelDetail = () => {
 
   if (error || !hotel) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl p-12">
+      <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
+        <div className="text-center bg-card rounded-2xl p-12 border shadow-lg">
           <div className="text-6xl mb-4">😔</div>
-          <h1 className="text-2xl font-bold mb-4 text-gray-800">Oops! Hotel Not Found</h1>
-          <p className="text-gray-600 mb-6">The magical place you're looking for seems to have vanished!</p>
-          <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
-            <Link to="/hotels">🏠 Back to Hotels</Link>
+          <h1 className="text-2xl font-bold mb-4 text-foreground">Oops! Hotel Not Found</h1>
+          <p className="text-muted-foreground mb-6">The place you're looking for seems to have vanished!</p>
+          <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Link to="/hotels">Back to Hotels</Link>
           </Button>
         </div>
       </div>
@@ -104,12 +104,12 @@ const HotelDetail = () => {
     : null;
 
   return (
-    <div className="container mx-auto px-4 py-12 bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+    <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
       <div className="mb-8">
-        <Button variant="ghost" asChild className="mb-6 hover:bg-white/80 transition-all duration-300 group">
+        <Button variant="ghost" asChild className="mb-6 hover:bg-accent transition-all duration-300 group">
           <Link to="/hotels">
             <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-            ← Back to Hotels
+            Back to Hotels
           </Link>
         </Button>
         
@@ -121,7 +121,7 @@ const HotelDetail = () => {
                   <img
                     src={mainImageUrl}
                     alt={hotel.name}
-                    className="w-full h-96 object-cover rounded-2xl shadow-2xl group-hover:scale-105 transition-all duration-500"
+                    className="w-full h-96 object-cover rounded-2xl shadow-lg group-hover:scale-105 transition-all duration-500"
                     onError={(e) => {
                       e.currentTarget.src = '/placeholder.svg';
                     }}
@@ -132,7 +132,7 @@ const HotelDetail = () => {
                   </div>
                 </div>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl bg-white/95 backdrop-blur">
+              <DialogContent className="max-w-4xl bg-card border">
                 <div className="relative">
                   <img
                     src={allImages[selectedImageIndex] || mainImageUrl}
@@ -166,7 +166,7 @@ const HotelDetail = () => {
                       <img
                         src={image}
                         alt={`${hotel.name} gallery ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-xl cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg"
+                        className="w-full h-24 object-cover rounded-xl cursor-pointer hover:scale-105 transition-transform duration-300 shadow-md"
                         onClick={() => setSelectedImageIndex(index + 1)}
                       />
                     </DialogTrigger>
@@ -177,63 +177,65 @@ const HotelDetail = () => {
           </div>
           
           <div className="space-y-6">
-            <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-xl">
-              <div className="flex items-start justify-between mb-4">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  {hotel.name}
-                </h1>
-                <div className="flex items-center gap-2 bg-yellow-100 px-3 py-1 rounded-full">
-                  <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                  <span className="text-lg font-bold text-yellow-700">
-                    {averageRating || hotel.rating || 'N/A'}
-                  </span>
-                  {reviews && reviews.length > 0 && (
-                    <span className="text-sm text-yellow-600 ml-1">
-                      ({reviews.length} 💖)
+            <Card className="border shadow-lg bg-card">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <h1 className="text-4xl font-bold text-foreground">
+                    {hotel.name}
+                  </h1>
+                  <div className="flex items-center gap-2 bg-yellow-100 dark:bg-yellow-900/30 px-3 py-1 rounded-full">
+                    <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                    <span className="text-lg font-bold text-yellow-700 dark:text-yellow-300">
+                      {averageRating || hotel.rating || 'N/A'}
                     </span>
+                    {reviews && reviews.length > 0 && (
+                      <span className="text-sm text-yellow-600 dark:text-yellow-400 ml-1">
+                        ({reviews.length} reviews)
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex items-center text-muted-foreground mb-4">
+                  <MapPin className="h-5 w-5 mr-2 text-primary" />
+                  <span className="text-lg">{hotel.location}</span>
+                </div>
+                
+                <div className="flex gap-3 mb-6">
+                  {hotel.type && (
+                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 px-3 py-1">
+                      {hotel.type}
+                    </Badge>
+                  )}
+                  {hotel.price_range && (
+                    <Badge variant="outline" className="border-primary/30 text-foreground px-3 py-1">
+                      {hotel.price_range}
+                    </Badge>
                   )}
                 </div>
-              </div>
-              
-              <div className="flex items-center text-gray-600 mb-4">
-                <MapPin className="h-5 w-5 mr-2 text-red-500" />
-                <span className="text-lg">{hotel.location}</span>
-              </div>
-              
-              <div className="flex gap-3 mb-6">
-                {hotel.type && (
-                  <Badge variant="outline" className="bg-gradient-to-r from-green-100 to-blue-100 border-green-300 text-green-700 px-3 py-1">
-                    🏨 {hotel.type}
-                  </Badge>
-                )}
-                {hotel.price_range && (
-                  <Badge variant="secondary" className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-3 py-1">
-                    💰 {hotel.price_range}
-                  </Badge>
-                )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {hotel.description && (
-              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur">
+              <Card className="border shadow-lg bg-card">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <Heart className="w-5 h-5 text-red-500" />
-                    About This Special Place
+                  <CardTitle className="flex items-center gap-2 text-xl text-foreground">
+                    <Heart className="w-5 h-5 text-primary" />
+                    About This Place
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 leading-relaxed text-lg">{hotel.description}</p>
+                  <p className="text-muted-foreground leading-relaxed text-lg">{hotel.description}</p>
                 </CardContent>
               </Card>
             )}
 
             {hotel.amenities && hotel.amenities.length > 0 && (
-              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur">
+              <Card className="border shadow-lg bg-card">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <Sparkles className="w-5 h-5 text-yellow-500" />
-                    Amazing Amenities
+                  <CardTitle className="flex items-center gap-2 text-xl text-foreground">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                    Amenities
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -241,9 +243,9 @@ const HotelDetail = () => {
                     {hotel.amenities.map((amenity, index) => {
                       const IconComponent = amenityIcons[amenity] || Star;
                       return (
-                        <div key={index} className="flex items-center gap-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                        <div key={index} className="flex items-center gap-3 p-2 bg-primary/5 rounded-lg">
                           <IconComponent className="h-5 w-5 text-primary" />
-                          <span className="text-sm font-medium">{amenity}</span>
+                          <span className="text-sm font-medium text-foreground">{amenity}</span>
                         </div>
                       );
                     })}
@@ -254,13 +256,13 @@ const HotelDetail = () => {
 
             <div className="flex gap-4">
               <BookingDialog hotel={hotel}>
-                <Button size="lg" className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg text-lg py-3">
-                  🎉 Book Now
+                <Button size="lg" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground transform hover:scale-105 transition-all duration-300 shadow-lg text-lg py-3">
+                  Book Now
                 </Button>
               </BookingDialog>
               <ReviewDialog hotel={hotel} onReviewAdded={() => window.location.reload()}>
-                <Button variant="outline" size="lg" className="border-2 hover:bg-purple-50 hover:border-purple-300 transition-all duration-300">
-                  ⭐ Add Review
+                <Button variant="outline" size="lg" className="border-2 border-primary/30 hover:bg-primary/5 hover:border-primary transition-all duration-300 text-foreground">
+                  Add Review
                 </Button>
               </ReviewDialog>
             </div>
@@ -270,30 +272,30 @@ const HotelDetail = () => {
         {/* Reviews Section */}
         {reviews && reviews.length > 0 && (
           <div className="mt-16">
-            <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              💖 What Our Guests Say
+            <h2 className="text-3xl font-bold mb-8 text-center text-foreground">
+              What Our Guests Say
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {reviews.map((review) => (
-                <Card key={review.id} className="border-0 shadow-lg bg-white/90 backdrop-blur hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Card key={review.id} className="border shadow-lg bg-card hover:shadow-xl transition-all duration-300 hover:scale-105">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-white" />
+                        <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+                          <User className="h-5 w-5 text-primary" />
                         </div>
-                        <span className="font-semibold text-gray-800">Happy Guest 😊</span>
+                        <span className="font-semibold text-foreground">Guest</span>
                       </div>
-                      <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded-full">
+                      <div className="flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded-full">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-bold text-yellow-700">{review.rating}</span>
+                        <span className="font-bold text-yellow-700 dark:text-yellow-300">{review.rating}</span>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-700 leading-relaxed">{review.comment}</p>
-                    <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
-                      📅 {new Date(review.created_at).toLocaleDateString()}
+                    <p className="text-muted-foreground leading-relaxed">{review.comment}</p>
+                    <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+                      {new Date(review.created_at).toLocaleDateString()}
                     </p>
                   </CardContent>
                 </Card>
@@ -305,32 +307,30 @@ const HotelDetail = () => {
         {/* Rooms Section */}
         {hotel.hotel_rooms && hotel.hotel_rooms.length > 0 && (
           <div className="mt-16">
-            <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              🏠 Beautiful Rooms Available
+            <h2 className="text-3xl font-bold mb-8 text-center text-foreground">
+              Available Rooms
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {hotel.hotel_rooms.map((room) => (
-                <Card key={room.id} className="border-0 shadow-lg bg-white/90 backdrop-blur hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Card key={room.id} className="border shadow-lg bg-card hover:shadow-xl transition-all duration-300 hover:scale-105">
                   <CardHeader>
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      🛏️ {room.room_type}
-                    </CardTitle>
+                    <CardTitle className="text-xl text-foreground">{room.room_type}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <p className="text-sm text-gray-600 flex items-center gap-2">
-                        🏠 Available: {room.total_numbers} rooms
+                      <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        Available: {room.total_numbers} rooms
                       </p>
                       {room.price && (
-                        <p className="text-xl font-bold text-green-600">
+                        <p className="text-xl font-bold text-primary">
                           {formatETB(room.price)}/night
                         </p>
                       )}
                       {room.features && room.features.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                           {room.features.slice(0, 3).map((feature, index) => (
-                            <Badge key={index} variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
-                              ✨ {feature}
+                            <Badge key={index} variant="outline" className="text-xs bg-primary/5 border-primary/20 text-primary">
+                              {feature}
                             </Badge>
                           ))}
                         </div>
@@ -346,26 +346,26 @@ const HotelDetail = () => {
         {/* Services Section */}
         {hotel.hotel_services && hotel.hotel_services.length > 0 && (
           <div className="mt-16">
-            <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-              🌟 Special Services
+            <h2 className="text-3xl font-bold mb-8 text-center text-foreground">
+              Special Services
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {hotel.hotel_services.map((service) => (
-                <Card key={service.id} className="border-0 shadow-lg bg-white/90 backdrop-blur hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Card key={service.id} className="border shadow-lg bg-card hover:shadow-xl transition-all duration-300 hover:scale-105">
                   <CardHeader>
-                    <CardTitle className="text-xl">{service.service_name}</CardTitle>
-                    <Badge variant="outline" className="w-fit bg-purple-50 border-purple-200 text-purple-700">
-                      🎯 {service.service_category}
+                    <CardTitle className="text-xl text-foreground">{service.service_name}</CardTitle>
+                    <Badge variant="outline" className="w-fit bg-primary/5 border-primary/20 text-primary">
+                      {service.service_category}
                     </Badge>
                   </CardHeader>
                   <CardContent>
                     {service.description && (
-                      <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                      <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
                         {service.description}
                       </p>
                     )}
                     {service.price && (
-                      <p className="font-bold text-green-600 text-lg">{formatETB(service.price)}</p>
+                      <p className="font-bold text-primary text-lg">{formatETB(service.price)}</p>
                     )}
                   </CardContent>
                 </Card>
