@@ -2,11 +2,16 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { hotels } from "@/data/mockData";
 import HotelCard from "@/components/hotel/HotelCard";
+import { useQuery } from "@tanstack/react-query";
+import { getFeaturedHotels } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
-  const featuredHotels = hotels.slice(0, 4);
+  const { data: featuredHotels, isLoading } = useQuery({
+    queryKey: ['featuredHotels'],
+    queryFn: getFeaturedHotels
+  });
 
   return (
     <div className="flex flex-col">
@@ -46,9 +51,17 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Featured Stays</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredHotels.map(hotel => (
-              <HotelCard key={hotel.id} hotel={hotel} />
-            ))}
+            {isLoading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-56 w-full rounded-lg" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                ))
+              : featuredHotels?.map(hotel => (
+                  <HotelCard key={hotel.id} hotel={hotel} />
+                ))}
           </div>
         </div>
       </section>

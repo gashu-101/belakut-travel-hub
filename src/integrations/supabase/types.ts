@@ -9,7 +9,135 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      experiences: {
+        Row: {
+          category: string | null
+          created_at: string
+          duration: string | null
+          id: string
+          image: string | null
+          location: string | null
+          name: string
+          price_per_guest: number | null
+          provider: string | null
+          rating: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          duration?: string | null
+          id?: string
+          image?: string | null
+          location?: string | null
+          name: string
+          price_per_guest?: number | null
+          provider?: string | null
+          rating?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          duration?: string | null
+          id?: string
+          image?: string | null
+          location?: string | null
+          name?: string
+          price_per_guest?: number | null
+          provider?: string | null
+          rating?: number | null
+        }
+        Relationships: []
+      }
+      hotels: {
+        Row: {
+          amenities: string[] | null
+          created_at: string
+          description: string | null
+          gallery: string[] | null
+          id: string
+          image: string | null
+          location: string
+          name: string
+          price_range: Database["public"]["Enums"]["price_range"] | null
+          rating: number | null
+          type: Database["public"]["Enums"]["hotel_type"] | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          created_at?: string
+          description?: string | null
+          gallery?: string[] | null
+          id?: string
+          image?: string | null
+          location: string
+          name: string
+          price_range?: Database["public"]["Enums"]["price_range"] | null
+          rating?: number | null
+          type?: Database["public"]["Enums"]["hotel_type"] | null
+        }
+        Update: {
+          amenities?: string[] | null
+          created_at?: string
+          description?: string | null
+          gallery?: string[] | null
+          id?: string
+          image?: string | null
+          location?: string
+          name?: string
+          price_range?: Database["public"]["Enums"]["price_range"] | null
+          rating?: number | null
+          type?: Database["public"]["Enums"]["hotel_type"] | null
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          experience_id: string | null
+          hotel_id: string | null
+          id: string
+          photos: string[] | null
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          experience_id?: string | null
+          hotel_id?: string | null
+          id?: string
+          photos?: string[] | null
+          rating: number
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          experience_id?: string | null
+          hotel_id?: string | null
+          id?: string
+          photos?: string[] | null
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +146,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      hotel_type: "Hotel" | "Resort" | "Lodge" | "Guesthouse"
+      price_range: "$$" | "$$$" | "$$$$"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +262,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      hotel_type: ["Hotel", "Resort", "Lodge", "Guesthouse"],
+      price_range: ["$$", "$$$", "$$$$"],
+    },
   },
 } as const

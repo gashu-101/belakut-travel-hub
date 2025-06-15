@@ -1,25 +1,5 @@
 
-export interface Hotel {
-  id: string;
-  name: string;
-  type: 'Hotel' | 'Resort' | 'Lodge' | 'Guesthouse';
-  location: string;
-  priceRange: '$$' | '$$$' | '$$$$';
-  rating: number;
-  image: string;
-  gallery: string[];
-  description: string;
-  amenities: string[];
-}
+import type { Database } from './integrations/supabase/types';
 
-export interface Experience {
-  id: string;
-  name: string;
-  provider: string;
-  location: string;
-  pricePerGuest: number;
-  category: string;
-  duration: string;
-  rating: number;
-  image: string;
-}
+export type Hotel = Database['public']['Tables']['hotels']['Row'];
+export type Experience = Database['public']['Tables']['experiences']['Row'];

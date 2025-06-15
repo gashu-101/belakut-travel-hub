@@ -15,7 +15,7 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
         <CardContent className="p-0">
           <div className="relative">
             <img 
-              src={hotel.image} 
+              src={hotel.image || '/placeholder.svg'} 
               alt={hotel.name}
               className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -25,11 +25,11 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
               <h3 className="font-semibold text-lg truncate">{hotel.name}</h3>
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 text-primary fill-current" />
-                <span className="text-sm font-medium">{hotel.rating}</span>
+                <span className="text-sm font-medium">{hotel.rating || 'N/A'}</span>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">{hotel.location}</p>
-            <p className="text-sm text-muted-foreground mt-2">{hotel.type}</p>
+            <p className="text-sm text-muted-foreground mt-2">{hotel.type || 'Stay'}</p>
           </div>
         </CardContent>
       </Card>
