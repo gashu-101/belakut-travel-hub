@@ -1,50 +1,45 @@
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Bell, Check } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Bell, BellRing, Heart, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/lib/notificationApi';
-import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { formatETB } from '@/lib/currency';
 
 const NotificationBell = () => {
-  const [open, setOpen] = useState(false);
-  const { toast } = useToast();
+  const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: notifications = [] } = useQuery({
+  const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: getUserNotifications,
-    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAsReadMutation = useMutation({
-    mutationFn: markNotificationAsRead,
-    onSuccess: () => {
+  const handleMarkAsRead = async (notificationId: string) => {
+    try {
+      await markNotificationAsRead(notificationId);
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-    },
-  });
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  };
 
-  const markAllAsReadMutation = useMutation({
-    mutationFn: markAllNotificationsAsRead,
-    onSuccess: () => {
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllNotificationsAsRead();
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      toast({
-        title: "Success",
-        description: "All notifications marked as read",
-      });
-    },
-  });
-
-  const handleNotificationClick = (notification: any) => {
-    if (!notification.read) {
-      markAsReadMutation.mutate(notification.id);
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
     }
   };
 
@@ -57,86 +52,133 @@ const NotificationBell = () => {
       case 'warning':
         return '⚠️';
       default:
-        return 'ℹ️';
+        return '📢';
     }
   };
 
+  const formatNotificationTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return `${Math.floor(diffInMinutes / 1440)}d ago`;
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative">
-          <Bell className="h-5 w-5" />
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative group hover:bg-purple-50 transition-all duration-300">
+          {unreadCount > 0 ? (
+            <BellRing className="h-5 w-5 text-purple-600 animate-pulse" />
+          ) : (
+            <Bell className="h-5 w-5 text-gray-600 group-hover:text-purple-600 transition-colors" />
+          )}
           {unreadCount > 0 && (
             <Badge 
               variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+              className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs animate-bounce bg-gradient-to-r from-pink-500 to-red-500"
             >
-              {unreadCount > 99 ? '99+' : unreadCount}
+              {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
           )}
+          {unreadCount > 0 && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-400 rounded-full animate-ping opacity-75" />
+          )}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold">Notifications</h3>
-            {unreadCount > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => markAllAsReadMutation.mutate()}
-                disabled={markAllAsReadMutation.isPending}
-              >
-                <Check className="h-4 w-4 mr-1" />
-                Mark all read
-              </Button>
-            )}
-          </div>
+      </DropdownMenuTrigger>
+      
+      <DropdownMenuContent align="end" className="w-80 bg-white/95 backdrop-blur border-0 shadow-2xl">
+        <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-50 to-pink-50">
+          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+            <Heart className="w-4 h-4 text-red-500" />
+            Notifications
+          </h3>
+          {unreadCount > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleMarkAllAsRead}
+              className="text-xs hover:bg-white/80 transition-colors"
+            >
+              ✨ Mark all read
+            </Button>
+          )}
         </div>
-        
-        <ScrollArea className="h-96">
-          {notifications.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">
-              No notifications yet
+
+        <div className="max-h-96 overflow-y-auto">
+          {isLoading ? (
+            <div className="p-4 text-center">
+              <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-sm text-gray-500">Loading magical updates...</p>
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="p-8 text-center">
+              <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 text-sm">No notifications yet!</p>
+              <p className="text-gray-400 text-xs mt-1">We'll let you know when something exciting happens ✨</p>
             </div>
           ) : (
-            <div className="p-2">
-              {notifications.map((notification, index) => (
-                <div key={notification.id}>
-                  <div
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                      !notification.read 
-                        ? 'bg-blue-50 hover:bg-blue-100' 
-                        : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => handleNotificationClick(notification)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-lg">{getNotificationIcon(notification.type)}</span>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-sm">{notification.title}</h4>
-                          {!notification.read && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {format(new Date(notification.created_at), 'MMM d, h:mm a')}
-                        </p>
-                      </div>
-                    </div>
+            notifications.map((notification) => (
+              <DropdownMenuItem
+                key={notification.id}
+                className={`p-4 cursor-pointer border-b last:border-b-0 transition-all duration-300 ${
+                  !notification.read 
+                    ? 'bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100' 
+                    : 'hover:bg-gray-50'
+                }`}
+                onClick={() => handleMarkAsRead(notification.id)}
+              >
+                <div className="flex items-start gap-3 w-full">
+                  <div className="text-2xl flex-shrink-0">
+                    {getNotificationIcon(notification.type)}
                   </div>
-                  {index < notifications.length - 1 && <Separator className="my-1" />}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-sm text-gray-800 truncate">
+                        {notification.title}
+                      </h4>
+                      {!notification.read && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 animate-pulse" />
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed mb-2">
+                      {notification.message}
+                    </p>
+                    {notification.metadata && notification.metadata.total_amount && (
+                      <div className="text-xs font-semibold text-green-600 mb-1">
+                        💰 {formatETB(notification.metadata.total_amount)}
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-400">
+                      {formatNotificationTime(notification.created_at)}
+                    </p>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </DropdownMenuItem>
+            ))
           )}
-        </ScrollArea>
-      </PopoverContent>
-    </Popover>
+        </div>
+
+        {notifications.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            <div className="p-2 bg-gradient-to-r from-purple-50 to-pink-50">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="w-full text-xs hover:bg-white/80 transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                🎯 View All Notifications
+              </Button>
+            </div>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

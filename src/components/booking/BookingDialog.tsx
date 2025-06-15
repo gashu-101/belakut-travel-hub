@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Users } from 'lucide-react';
+import { CalendarIcon, Users, Heart, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
@@ -16,7 +16,10 @@ import { z } from 'zod';
 import { createBooking } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { Hotel } from '@/types';
+import { formatETB } from '@/lib/currency';
 import ChapaPayment from '@/components/payment/ChapaPayment';
+import FloatingHearts from '@/components/ui/floating-hearts';
+import SuccessAnimation from '@/components/ui/success-animation';
 
 const bookingSchema = z.object({
   checkInDate: z.date({ required_error: "Check-in date is required" }),
@@ -40,6 +43,8 @@ const BookingDialog = ({ hotel, children }: BookingDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [bookingId, setBookingId] = useState<string>('');
+  const [showHearts, setShowHearts] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<BookingFormData>({
@@ -52,7 +57,7 @@ const BookingDialog = ({ hotel, children }: BookingDialogProps) => {
 
   const calculateTotal = (checkIn: Date, checkOut: Date, guests: number) => {
     const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-    const basePrice = 100; // Default price per night
+    const basePrice = 2500; // Base price per night in ETB
     return nights * basePrice * guests;
   };
 
@@ -77,18 +82,19 @@ const BookingDialog = ({ hotel, children }: BookingDialogProps) => {
 
       setBookingId(booking.id);
       setShowPayment(true);
+      setShowHearts(true);
       
       // Notify property owner
       await notifyPropertyOwner(hotel.owner_id, booking.id, hotel.name);
 
       toast({
-        title: "Booking Created",
-        description: "Proceed to payment to complete your booking",
+        title: "🎉 Booking Created Successfully!",
+        description: "Your adventure awaits! Please proceed to payment to secure your stay.",
       });
     } catch (error) {
       toast({
-        title: "Booking Failed",
-        description: error instanceof Error ? error.message : "Failed to create booking",
+        title: "😔 Booking Failed",
+        description: error instanceof Error ? error.message : "Something went wrong, please try again",
         variant: "destructive",
       });
     } finally {
@@ -98,19 +104,20 @@ const BookingDialog = ({ hotel, children }: BookingDialogProps) => {
 
   const notifyPropertyOwner = async (ownerId: string | null, bookingId: string, hotelName: string) => {
     if (!ownerId) return;
-    
-    // Here you would typically send a notification to the property owner
-    // This could be via email, in-app notification, etc.
     console.log(`Notifying owner ${ownerId} about new booking ${bookingId} for ${hotelName}`);
   };
 
   const handlePaymentSuccess = () => {
     setOpen(false);
     setShowPayment(false);
+    setShowSuccess(true);
     form.reset();
+    
+    setTimeout(() => setShowSuccess(false), 3000);
+    
     toast({
-      title: "Payment Initiated",
-      description: "Your payment is being processed",
+      title: "💳 Payment Processing",
+      description: "Your payment is being processed with love and care ✨",
     });
   };
 
@@ -120,9 +127,11 @@ const BookingDialog = ({ hotel, children }: BookingDialogProps) => {
         <DialogTrigger asChild>
           {children}
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-blue-50 to-purple-50">
           <DialogHeader>
-            <DialogTitle>Complete Payment</DialogTitle>
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+              Complete Your Dream Stay ✨
+            </DialogTitle>
           </DialogHeader>
           <ChapaPayment
             amount={totalAmount}
@@ -136,170 +145,186 @@ const BookingDialog = ({ hotel, children }: BookingDialogProps) => {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Book {hotel.name}</DialogTitle>
-        </DialogHeader>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="checkInDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Check-in Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-green-50 to-blue-50 border-0 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-2">
+              <Heart className="w-6 h-6 text-red-500 animate-pulse" />
+              Book Your Perfect Stay
+              <Sparkles className="w-5 h-5 text-yellow-500 animate-spin" />
+            </DialogTitle>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="checkInDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-sm font-semibold text-gray-700">Check-in Date 📅</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "pl-3 text-left font-normal border-2 hover:border-green-400 transition-all duration-300",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick your arrival 🌅</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="checkOutDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-sm font-semibold text-gray-700">Check-out Date 📅</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "pl-3 text-left font-normal border-2 hover:border-blue-400 transition-all duration-300",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick departure 🌅</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date() || (form.watch('checkInDate') && date <= form.watch('checkInDate'))}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
-                name="checkOutDate"
+                name="guestsCount"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Check-out Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date() || (form.watch('checkInDate') && date <= form.watch('checkInDate'))}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="guestsCount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Number of Guests</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center space-x-2">
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                       <Users className="h-4 w-4" />
+                      Number of Guests 👥
+                    </FormLabel>
+                    <FormControl>
                       <Input
                         type="number"
                         min="1"
                         max="20"
+                        className="border-2 focus:border-purple-400 transition-all duration-300"
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value))}
                       />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="specialRequests"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Special Requests (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Any special requirements or requests..."
-                      className="min-h-[80px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="specialRequests"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold text-gray-700">Special Requests 💝</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Tell us how we can make your stay extra special... 🌟"
+                        className="min-h-[80px] border-2 focus:border-pink-400 transition-all duration-300"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {totalAmount > 0 && (
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-medium">Total:</span>
-                  <span className="text-xl font-bold">{totalAmount} ETB</span>
+              {totalAmount > 0 && (
+                <div className="border-2 border-dashed border-green-300 rounded-xl p-4 bg-gradient-to-r from-green-50 to-emerald-50">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold text-gray-700">Total Amount:</span>
+                    <span className="text-2xl font-bold text-green-600">{formatETB(totalAmount)}</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">✨ Includes all taxes and fees</p>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div className="flex gap-2 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setOpen(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isLoading}
-                className="flex-1"
-              >
-                {isLoading ? "Creating Booking..." : "Proceed to Payment"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+              <div className="flex gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setOpen(false)}
+                  className="flex-1 border-2 hover:bg-gray-50 transition-all duration-300"
+                >
+                  Maybe Later 🤔
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg"
+                >
+                  {isLoading ? "Creating Magic... ✨" : "Book My Dream Stay! 🎉"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      <FloatingHearts trigger={showHearts} />
+      <SuccessAnimation 
+        show={showSuccess} 
+        message="Your booking is confirmed! Get ready for an amazing experience!" 
+      />
+    </>
   );
 };
 

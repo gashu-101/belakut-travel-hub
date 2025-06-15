@@ -1,141 +1,161 @@
 
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Users, MapPin, Check, X } from 'lucide-react';
+import { Calendar, Users, DollarSign, Clock, CheckCircle, Heart } from 'lucide-react';
+import { formatETB } from '@/lib/currency';
 import { approvePayment } from '@/lib/notificationApi';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { useState } from 'react';
+
+interface Booking {
+  id: string;
+  hotel_name: string;
+  guest_count: number;
+  check_in_date: string;
+  check_out_date: string;
+  total_amount: number;
+  status: string;
+  created_at: string;
+  payment_approved: boolean;
+}
 
 interface BookingApprovalCardProps {
-  booking: any;
-  onApprove?: () => void;
+  booking: Booking;
+  onApprove: () => void;
 }
 
 const BookingApprovalCard = ({ booking, onApprove }: BookingApprovalCardProps) => {
+  const [isApproving, setIsApproving] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const approvePaymentMutation = useMutation({
-    mutationFn: () => approvePayment(booking.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hotel-bookings'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      onApprove?.();
+  const handleApprove = async () => {
+    setIsApproving(true);
+    try {
+      await approvePayment(booking.id);
+      onApprove();
       toast({
-        title: "Payment Approved",
-        description: "The booking has been confirmed and the guest has been notified.",
+        title: "🎉 Payment Approved!",
+        description: "The guest has been notified and can now enjoy their stay!",
       });
-    },
-    onError: (error) => {
+    } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to approve payment",
+        title: "😔 Approval Failed",
+        description: error instanceof Error ? error.message : "Something went wrong",
         variant: "destructive",
       });
-    },
-  });
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+    } finally {
+      setIsApproving(false);
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50 hover:shadow-2xl transition-all duration-300">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Booking #{booking.id.slice(0, 8)}</CardTitle>
-          <Badge className={getStatusColor(booking.status)}>
-            {booking.status}
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Heart className="w-5 h-5 text-red-500 animate-pulse" />
+            {booking.hotel_name}
+          </CardTitle>
+          <Badge 
+            variant={booking.payment_approved ? "default" : "secondary"}
+            className={booking.payment_approved 
+              ? "bg-green-100 text-green-700 border-green-300" 
+              : "bg-yellow-100 text-yellow-700 border-yellow-300"
+            }
+          >
+            {booking.payment_approved ? (
+              <div className="flex items-center gap-1">
+                <CheckCircle className="w-3 h-3" />
+                Approved ✅
+              </div>
+            ) : (
+              <div className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                Pending Review ⏳
+              </div>
+            )}
           </Badge>
         </div>
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Check-in</p>
-              <p className="text-sm text-muted-foreground">
-                {format(new Date(booking.check_in_date), 'MMM d, yyyy')}
-              </p>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="w-4 h-4 text-blue-500" />
+              <div>
+                <p className="font-medium text-gray-700">Check-in</p>
+                <p className="text-gray-600">{formatDate(booking.check_in_date)} 📅</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 text-sm">
+              <Users className="w-4 h-4 text-green-500" />
+              <div>
+                <p className="font-medium text-gray-700">Guests</p>
+                <p className="text-gray-600">{booking.guest_count} people 👥</p>
+              </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Check-out</p>
-              <p className="text-sm text-muted-foreground">
-                {format(new Date(booking.check_out_date), 'MMM d, yyyy')}
-              </p>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="w-4 h-4 text-red-500" />
+              <div>
+                <p className="font-medium text-gray-700">Check-out</p>
+                <p className="text-gray-600">{formatDate(booking.check_out_date)} 📅</p>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Guests</p>
-              <p className="text-sm text-muted-foreground">{booking.guests_count}</p>
+            
+            <div className="flex items-center gap-2 text-sm">
+              <DollarSign className="w-4 h-4 text-purple-500" />
+              <div>
+                <p className="font-medium text-gray-700">Total Amount</p>
+                <p className="text-xl font-bold text-green-600">{formatETB(booking.total_amount)}</p>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-green-600">
-              ${booking.total_amount}
-            </span>
           </div>
         </div>
-
-        {booking.special_requests && (
-          <div>
-            <p className="text-sm font-medium mb-1">Special Requests</p>
-            <p className="text-sm text-muted-foreground bg-gray-50 p-2 rounded">
-              {booking.special_requests}
-            </p>
-          </div>
-        )}
-
-        <div className="flex items-center gap-2 pt-2">
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-            <span className="text-sm">Payment Approval Required</span>
-          </div>
-        </div>
-
-        {!booking.payment_approved && booking.status === 'pending' && (
-          <div className="flex gap-2 pt-4">
-            <Button
-              onClick={() => approvePaymentMutation.mutate()}
-              disabled={approvePaymentMutation.isPending}
-              className="flex-1"
+        
+        <div className="border-t pt-4">
+          <p className="text-xs text-gray-500 mb-3">
+            📆 Booking created: {formatDate(booking.created_at)}
+          </p>
+          
+          {!booking.payment_approved && (
+            <Button 
+              onClick={handleApprove}
+              disabled={isApproving}
+              className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg"
             >
-              <Check className="h-4 w-4 mr-2" />
-              {approvePaymentMutation.isPending ? 'Approving...' : 'Approve Payment'}
+              {isApproving ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Approving Payment... ✨
+                </div>
+              ) : (
+                '🎉 Approve Payment'
+              )}
             </Button>
-          </div>
-        )}
-
-        {booking.payment_approved && (
-          <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
-            <Check className="h-4 w-4 text-green-600" />
-            <span className="text-sm text-green-700">
-              Payment approved on {format(new Date(booking.payment_approved_at), 'MMM d, yyyy')}
-            </span>
-          </div>
-        )}
+          )}
+          
+          {booking.payment_approved && (
+            <div className="text-center p-4 bg-green-50 rounded-xl">
+              <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+              <p className="text-green-700 font-medium">Payment Approved! 🎉</p>
+              <p className="text-green-600 text-sm">Guest can now enjoy their stay</p>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

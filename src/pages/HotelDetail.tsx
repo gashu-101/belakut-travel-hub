@@ -1,3 +1,4 @@
+
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getHotelById, getHotelReviews } from '@/lib/api';
@@ -5,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { MapPin, Star, Wifi, Car, Utensils, ArrowLeft, User } from 'lucide-react';
+import { MapPin, Star, Wifi, Car, Utensils, ArrowLeft, User, Heart, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import BookingDialog from '@/components/booking/BookingDialog';
 import ReviewDialog from '@/components/reviews/ReviewDialog';
+import { formatETB } from '@/lib/currency';
 import { useState } from 'react';
 
 const HotelDetail = () => {
@@ -34,13 +36,15 @@ const HotelDetail = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <Skeleton className="h-8 w-64 mb-8" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Skeleton className="h-96 w-full rounded-lg" />
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-32 w-full" />
+        <div className="animate-pulse">
+          <Skeleton className="h-8 w-64 mb-8" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Skeleton className="h-96 w-full rounded-lg" />
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-32 w-full" />
+            </div>
           </div>
         </div>
       </div>
@@ -50,11 +54,12 @@ const HotelDetail = () => {
   if (error || !hotel) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Hotel Not Found</h1>
-          <p className="text-muted-foreground mb-4">The hotel you're looking for doesn't exist.</p>
-          <Button asChild>
-            <Link to="/hotels">Back to Hotels</Link>
+        <div className="text-center bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl p-12">
+          <div className="text-6xl mb-4">😔</div>
+          <h1 className="text-2xl font-bold mb-4 text-gray-800">Oops! Hotel Not Found</h1>
+          <p className="text-gray-600 mb-6">The magical place you're looking for seems to have vanished!</p>
+          <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
+            <Link to="/hotels">🏠 Back to Hotels</Link>
           </Button>
         </div>
       </div>
@@ -99,34 +104,40 @@ const HotelDetail = () => {
     : null;
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
       <div className="mb-8">
-        <Button variant="ghost" asChild className="mb-4">
+        <Button variant="ghost" asChild className="mb-6 hover:bg-white/80 transition-all duration-300 group">
           <Link to="/hotels">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Hotels
+            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+            ← Back to Hotels
           </Link>
         </Button>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
+          <div className="space-y-4">
             <Dialog>
               <DialogTrigger asChild>
-                <img
-                  src={mainImageUrl}
-                  alt={hotel.name}
-                  className="w-full h-96 object-cover rounded-lg shadow-lg mb-4 cursor-pointer hover:opacity-90 transition-opacity"
-                  onError={(e) => {
-                    e.currentTarget.src = '/placeholder.svg';
-                  }}
-                />
+                <div className="relative group cursor-pointer">
+                  <img
+                    src={mainImageUrl}
+                    alt={hotel.name}
+                    className="w-full h-96 object-cover rounded-2xl shadow-2xl group-hover:scale-105 transition-all duration-500"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder.svg';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Sparkles className="w-5 h-5 animate-pulse" />
+                  </div>
+                </div>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl">
+              <DialogContent className="max-w-4xl bg-white/95 backdrop-blur">
                 <div className="relative">
                   <img
                     src={allImages[selectedImageIndex] || mainImageUrl}
                     alt={`${hotel.name} - Image ${selectedImageIndex + 1}`}
-                    className="w-full h-96 object-cover rounded-lg"
+                    className="w-full h-96 object-cover rounded-xl"
                   />
                   {allImages.length > 1 && (
                     <div className="flex justify-center mt-4 gap-2">
@@ -135,8 +146,8 @@ const HotelDetail = () => {
                           key={index}
                           src={image}
                           alt={`${hotel.name} thumbnail ${index + 1}`}
-                          className={`w-16 h-16 object-cover rounded cursor-pointer ${
-                            selectedImageIndex === index ? 'ring-2 ring-primary' : ''
+                          className={`w-16 h-16 object-cover rounded-lg cursor-pointer transition-all duration-300 ${
+                            selectedImageIndex === index ? 'ring-4 ring-primary scale-110' : 'hover:scale-105'
                           }`}
                           onClick={() => setSelectedImageIndex(index)}
                         />
@@ -155,7 +166,7 @@ const HotelDetail = () => {
                       <img
                         src={image}
                         alt={`${hotel.name} gallery ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                        className="w-full h-24 object-cover rounded-xl cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg"
                         onClick={() => setSelectedImageIndex(index + 1)}
                       />
                     </DialogTrigger>
@@ -166,57 +177,73 @@ const HotelDetail = () => {
           </div>
           
           <div className="space-y-6">
-            <div>
-              <div className="flex items-start justify-between mb-2">
-                <h1 className="text-3xl font-bold">{hotel.name}</h1>
-                <div className="flex items-center gap-1">
-                  <Star className="w-5 h-5 text-primary fill-current" />
-                  <span className="text-lg font-medium">
+            <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-xl">
+              <div className="flex items-start justify-between mb-4">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  {hotel.name}
+                </h1>
+                <div className="flex items-center gap-2 bg-yellow-100 px-3 py-1 rounded-full">
+                  <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                  <span className="text-lg font-bold text-yellow-700">
                     {averageRating || hotel.rating || 'N/A'}
                   </span>
                   {reviews && reviews.length > 0 && (
-                    <span className="text-sm text-muted-foreground ml-1">
-                      ({reviews.length} reviews)
+                    <span className="text-sm text-yellow-600 ml-1">
+                      ({reviews.length} 💖)
                     </span>
                   )}
                 </div>
               </div>
               
-              <div className="flex items-center text-muted-foreground mb-4">
-                <MapPin className="h-4 w-4 mr-2" />
-                <span>{hotel.location}</span>
+              <div className="flex items-center text-gray-600 mb-4">
+                <MapPin className="h-5 w-5 mr-2 text-red-500" />
+                <span className="text-lg">{hotel.location}</span>
               </div>
               
-              <div className="flex gap-2 mb-4">
-                {hotel.type && <Badge variant="outline">{hotel.type}</Badge>}
-                {hotel.price_range && <Badge variant="secondary">{hotel.price_range}</Badge>}
+              <div className="flex gap-3 mb-6">
+                {hotel.type && (
+                  <Badge variant="outline" className="bg-gradient-to-r from-green-100 to-blue-100 border-green-300 text-green-700 px-3 py-1">
+                    🏨 {hotel.type}
+                  </Badge>
+                )}
+                {hotel.price_range && (
+                  <Badge variant="secondary" className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-3 py-1">
+                    💰 {hotel.price_range}
+                  </Badge>
+                )}
               </div>
             </div>
 
             {hotel.description && (
-              <Card>
+              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur">
                 <CardHeader>
-                  <CardTitle>About</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <Heart className="w-5 h-5 text-red-500" />
+                    About This Special Place
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">{hotel.description}</p>
+                  <p className="text-gray-700 leading-relaxed text-lg">{hotel.description}</p>
                 </CardContent>
               </Card>
             )}
 
             {hotel.amenities && hotel.amenities.length > 0 && (
-              <Card>
+              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur">
                 <CardHeader>
-                  <CardTitle>Amenities</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <Sparkles className="w-5 h-5 text-yellow-500" />
+                    Amazing Amenities
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     {hotel.amenities.map((amenity, index) => {
                       const IconComponent = amenityIcons[amenity] || Star;
                       return (
-                        <div key={index} className="flex items-center gap-2">
-                          <IconComponent className="h-4 w-4 text-primary" />
-                          <span className="text-sm">{amenity}</span>
+                        <div key={index} className="flex items-center gap-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                          <IconComponent className="h-5 w-5 text-primary" />
+                          <span className="text-sm font-medium">{amenity}</span>
                         </div>
                       );
                     })}
@@ -227,10 +254,14 @@ const HotelDetail = () => {
 
             <div className="flex gap-4">
               <BookingDialog hotel={hotel}>
-                <Button size="lg" className="flex-1">Book Now</Button>
+                <Button size="lg" className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg text-lg py-3">
+                  🎉 Book Now
+                </Button>
               </BookingDialog>
               <ReviewDialog hotel={hotel} onReviewAdded={() => window.location.reload()}>
-                <Button variant="outline" size="lg">Add Review</Button>
+                <Button variant="outline" size="lg" className="border-2 hover:bg-purple-50 hover:border-purple-300 transition-all duration-300">
+                  ⭐ Add Review
+                </Button>
               </ReviewDialog>
             </div>
           </div>
@@ -238,27 +269,31 @@ const HotelDetail = () => {
 
         {/* Reviews Section */}
         {reviews && reviews.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">Reviews</h2>
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              💖 What Our Guests Say
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {reviews.map((review) => (
-                <Card key={review.id}>
+                <Card key={review.id} className="border-0 shadow-lg bg-white/90 backdrop-blur hover:shadow-xl transition-all duration-300 hover:scale-105">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <span className="font-medium">Guest</span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                          <User className="h-5 w-5 text-white" />
+                        </div>
+                        <span className="font-semibold text-gray-800">Happy Guest 😊</span>
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded-full">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span>{review.rating}</span>
+                        <span className="font-bold text-yellow-700">{review.rating}</span>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground">{review.comment}</p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {new Date(review.created_at).toLocaleDateString()}
+                    <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                    <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                      📅 {new Date(review.created_at).toLocaleDateString()}
                     </p>
                   </CardContent>
                 </Card>
@@ -269,29 +304,33 @@ const HotelDetail = () => {
 
         {/* Rooms Section */}
         {hotel.hotel_rooms && hotel.hotel_rooms.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">Available Rooms</h2>
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              🏠 Beautiful Rooms Available
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {hotel.hotel_rooms.map((room) => (
-                <Card key={room.id}>
+                <Card key={room.id} className="border-0 shadow-lg bg-white/90 backdrop-blur hover:shadow-xl transition-all duration-300 hover:scale-105">
                   <CardHeader>
-                    <CardTitle className="text-lg">{room.room_type}</CardTitle>
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      🛏️ {room.room_type}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">
-                        Available: {room.total_numbers} rooms
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-600 flex items-center gap-2">
+                        🏠 Available: {room.total_numbers} rooms
                       </p>
                       {room.price && (
-                        <p className="text-lg font-semibold text-primary">
-                          ${room.price}/night
+                        <p className="text-xl font-bold text-green-600">
+                          {formatETB(room.price)}/night
                         </p>
                       )}
                       {room.features && room.features.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-2">
                           {room.features.slice(0, 3).map((feature, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {feature}
+                            <Badge key={index} variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
+                              ✨ {feature}
                             </Badge>
                           ))}
                         </div>
@@ -306,23 +345,27 @@ const HotelDetail = () => {
 
         {/* Services Section */}
         {hotel.hotel_services && hotel.hotel_services.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">Services</h2>
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              🌟 Special Services
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {hotel.hotel_services.map((service) => (
-                <Card key={service.id}>
+                <Card key={service.id} className="border-0 shadow-lg bg-white/90 backdrop-blur hover:shadow-xl transition-all duration-300 hover:scale-105">
                   <CardHeader>
-                    <CardTitle className="text-lg">{service.service_name}</CardTitle>
-                    <Badge variant="outline">{service.service_category}</Badge>
+                    <CardTitle className="text-xl">{service.service_name}</CardTitle>
+                    <Badge variant="outline" className="w-fit bg-purple-50 border-purple-200 text-purple-700">
+                      🎯 {service.service_category}
+                    </Badge>
                   </CardHeader>
                   <CardContent>
                     {service.description && (
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="text-sm text-gray-600 mb-3 leading-relaxed">
                         {service.description}
                       </p>
                     )}
                     {service.price && (
-                      <p className="font-semibold text-primary">${service.price}</p>
+                      <p className="font-bold text-green-600 text-lg">{formatETB(service.price)}</p>
                     )}
                   </CardContent>
                 </Card>
