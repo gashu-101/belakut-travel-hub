@@ -1,6 +1,6 @@
 
 import { useAuth } from '@/providers/AuthProvider';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getUserHotels, getHotelBookings } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -131,9 +131,11 @@ const PropertyCard = ({ hotel }: { hotel: any }) => {
               </div>
             </div>
             
-            <Button variant="outline" size="sm" className="w-full">
-              <Eye className="h-4 w-4 mr-2" />
-              View Details
+            <Button variant="outline" size="sm" className="w-full" asChild>
+              <Link to={`/hotels/${hotel.id}`}>
+                <Eye className="h-4 w-4 mr-2" />
+                View Details
+              </Link>
             </Button>
           </TabsContent>
           
