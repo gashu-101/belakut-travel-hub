@@ -2,10 +2,12 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Mountain, Plus, Settings } from 'lucide-react';
+import { Menu, Mountain, Search, Settings } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import UserNav from '@/components/auth/UserNav';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import SearchDialog from '@/components/search/SearchDialog';
+import AddDropdown from '@/components/header/AddDropdown';
 
 const NavItem = ({ to, children }: { to: string, children: React.ReactNode }) => (
   <NavLink
@@ -68,15 +70,16 @@ const Header = () => {
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
+          <SearchDialog>
+            <Button variant="ghost" size="sm">
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+          </SearchDialog>
           <ThemeToggle />
           {session ? (
             <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="sm">
-                <Link to="/add-hotel">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Property
-                </Link>
-              </Button>
+              <AddDropdown />
               <Button asChild variant="ghost" size="sm">
                 <Link to="/manage-properties">
                   <Settings className="h-4 w-4 mr-2" />

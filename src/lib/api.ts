@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { InsertHotel, InsertHotelRoom, InsertHotelHall, InsertHotelService, InsertHotelImage, InsertBooking, InsertBookingRoom, InsertReview } from "@/types";
 
@@ -10,6 +11,36 @@ export async function getHotels() {
     throw new Error(error.message);
   }
   console.log("Fetched hotels:", data);
+  return data;
+}
+
+export async function searchHotels(query: string) {
+  console.log("Searching hotels with query:", query);
+  const { data, error } = await supabase
+    .from("hotels")
+    .select("*")
+    .or(`name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`);
+
+  if (error) {
+    console.error("Error searching hotels:", error);
+    throw new Error(error.message);
+  }
+  console.log("Search results:", data);
+  return data;
+}
+
+export async function searchExperiences(query: string) {
+  console.log("Searching experiences with query:", query);
+  const { data, error } = await supabase
+    .from("experiences")
+    .select("*")
+    .or(`name.ilike.%${query}%,location.ilike.%${query}%,category.ilike.%${query}%,provider.ilike.%${query}%`);
+
+  if (error) {
+    console.error("Error searching experiences:", error);
+    throw new Error(error.message);
+  }
+  console.log("Search results:", data);
   return data;
 }
 
@@ -161,7 +192,7 @@ export async function addHotelImage(imageData: InsertHotelImage) {
 }
 
 // Booking functions
-export async function createBooking(bookingData: InsertBooking) {
+export async function createBooking(bookingData: Omit<InsertBooking, 'user_id'>) {
   console.log("Creating booking:", bookingData);
   
   const { data: { user } } = await supabase.auth.getUser();
@@ -241,7 +272,7 @@ export async function getHotelBookings(hotelId: string) {
 }
 
 // Review functions
-export async function addReview(reviewData: InsertReview) {
+export async function addReview(reviewData: Omit<InsertReview, 'user_id'>) {
   console.log("Adding review:", reviewData);
   
   const { data: { user } } = await supabase.auth.getUser();

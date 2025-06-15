@@ -14,6 +14,7 @@ import HotelDetail from "./pages/HotelDetail";
 import Experiences from "./pages/Experiences";
 import Auth from "./pages/Auth";
 import AddHotel from "./pages/AddHotel";
+import AddExperience from "./pages/AddExperience";
 import ManageProperties from "./pages/ManageProperties";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +36,7 @@ const App = () => (
                 <Route path="experiences" element={<Experiences />} />
                 <Route path="auth" element={<Auth />} />
                 <Route path="add-hotel" element={<AddHotel />} />
+                <Route path="add-experience" element={<AddExperience />} />
                 <Route path="manage-properties" element={<ManageProperties />} />
                 <Route path="*" element={<NotFound />} />
               </Route>

@@ -4,14 +4,26 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import HotelCard from "@/components/hotel/HotelCard";
 import { useQuery } from "@tanstack/react-query";
-import { getFeaturedHotels } from "@/lib/api";
+import { getFeaturedHotels, searchHotels } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
   const { data: featuredHotels, isLoading } = useQuery({
     queryKey: ['featuredHotels'],
     queryFn: getFeaturedHotels
   });
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/hotels?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <div className="flex flex-col">
@@ -29,12 +41,14 @@ const Index = () => {
             Book unique stays and authentic experiences, from the mountains of Tigray to the lakes of the Rift Valley.
           </p>
           <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-sm p-2 rounded-full">
-            <form className="flex items-center gap-2">
+            <form className="flex items-center gap-2" onSubmit={handleSearch}>
               <div className="relative flex-grow">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300" />
                 <Input
                   type="search"
                   placeholder="Search destinations, hotels, experiences..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-gray-300 pl-12 h-12 rounded-full"
                 />
               </div>
