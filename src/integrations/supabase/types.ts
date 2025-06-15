@@ -60,6 +60,9 @@ export type Database = {
           guests_count: number
           hotel_id: string
           id: string
+          payment_approved: boolean | null
+          payment_approved_at: string | null
+          payment_approved_by: string | null
           special_requests: string | null
           status: string
           total_amount: number | null
@@ -74,6 +77,9 @@ export type Database = {
           guests_count?: number
           hotel_id: string
           id?: string
+          payment_approved?: boolean | null
+          payment_approved_at?: string | null
+          payment_approved_by?: string | null
           special_requests?: string | null
           status?: string
           total_amount?: number | null
@@ -88,6 +94,9 @@ export type Database = {
           guests_count?: number
           hotel_id?: string
           id?: string
+          payment_approved?: boolean | null
+          payment_approved_at?: string | null
+          payment_approved_by?: string | null
           special_requests?: string | null
           status?: string
           total_amount?: number | null
@@ -351,6 +360,50 @@ export type Database = {
           type?: Database["public"]["Enums"]["hotel_type"] | null
         }
         Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean
+          related_booking_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean
+          related_booking_id?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean
+          related_booking_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_related_booking_id_fkey"
+            columns: ["related_booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {

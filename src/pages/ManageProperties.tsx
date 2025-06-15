@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/providers/AuthProvider';
 import { Navigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Hotel, MapPin, Calendar, Users, Eye, Trash2 } from 'lucide-react';
+import { Hotel, MapPin, Calendar, Users, Eye, Trash2, Bell } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import BookingApprovalCard from '@/components/booking/BookingApprovalCard';
 
 const ManageProperties = () => {
   const { session } = useAuth();
@@ -51,6 +51,23 @@ const ManageProperties = () => {
     },
   });
 
+  // Get all pending bookings for property owner
+  const { data: allBookings = [] } = useQuery({
+    queryKey: ['owner-all-bookings'],
+    queryFn: async () => {
+      if (!hotels) return [];
+      
+      const hotelIds = hotels.map(h => h.id);
+      const bookingPromises = hotelIds.map(id => getHotelBookings(id));
+      const bookingResults = await Promise.all(bookingPromises);
+      
+      return bookingResults.flat().filter(booking => 
+        booking.status === 'pending' && !booking.payment_approved
+      );
+    },
+    enabled: !!hotels,
+  });
+
   if (hotelsLoading) {
     return (
       <div className="container mx-auto px-4 py-12">
@@ -83,31 +100,81 @@ const ManageProperties = () => {
         </Button>
       </div>
 
-      {hotels?.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <Hotel className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">No Properties Yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Start by adding your first property to the platform.
-            </p>
-            <Button asChild>
-              <a href="/add-hotel">Add Your First Property</a>
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {hotels?.map((hotel) => (
-            <PropertyCard 
-              key={hotel.id} 
-              hotel={hotel} 
-              onDelete={() => deleteHotelMutation.mutate(hotel.id)}
-              isDeleting={deleteHotelMutation.isPending}
-            />
-          ))}
-        </div>
-      )}
+      <Tabs defaultValue="properties" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="properties">My Properties</TabsTrigger>
+          <TabsTrigger value="approvals" className="relative">
+            Pending Approvals
+            {allBookings.length > 0 && (
+              <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                {allBookings.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="properties" className="mt-6">
+          {hotels?.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <Hotel className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">No Properties Yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Start by adding your first property to the platform.
+                </p>
+                <Button asChild>
+                  <a href="/add-hotel">Add Your First Property</a>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {hotels?.map((hotel) => (
+                <PropertyCard 
+                  key={hotel.id} 
+                  hotel={hotel} 
+                  onDelete={() => deleteHotelMutation.mutate(hotel.id)}
+                  isDeleting={deleteHotelMutation.isPending}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="approvals" className="mt-6">
+          {allBookings.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">No Pending Approvals</h3>
+                <p className="text-muted-foreground">
+                  All payments are up to date. New bookings requiring approval will appear here.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-orange-500" />
+                <h2 className="text-xl font-semibold">Bookings Awaiting Payment Approval</h2>
+                <Badge variant="secondary">{allBookings.length}</Badge>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {allBookings.map((booking) => (
+                  <BookingApprovalCard 
+                    key={booking.id} 
+                    booking={booking}
+                    onApprove={() => {
+                      queryClient.invalidateQueries({ queryKey: ['owner-all-bookings'] });
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

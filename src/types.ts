@@ -1,3 +1,4 @@
+
 import type { Database, TablesInsert } from './integrations/supabase/types';
 
 export type Hotel = Database['public']['Tables']['hotels']['Row'];
@@ -24,3 +25,7 @@ export type InsertBookingRoom = TablesInsert<'booking_rooms'>;
 // Review types
 export type Review = Database['public']['Tables']['reviews']['Row'];
 export type InsertReview = TablesInsert<'reviews'>;
+
+// Notification types
+export type Notification = Database['public']['Tables']['notifications']['Row'];
+export type InsertNotification = TablesInsert<'notifications'>;
