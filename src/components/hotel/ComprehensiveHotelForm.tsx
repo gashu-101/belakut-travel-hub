@@ -1,4 +1,3 @@
-
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -29,6 +28,12 @@ const formSchema = z.object({
   price_range: z.enum(Constants.public.Enums.price_range),
 })
 
+const priceRangeLabels = {
+  "$$": "Budget-Friendly ($) - Under $50/night",
+  "$$$": "Mid-Range ($$) - $50-150/night", 
+  "$$$$": "Luxury ($$$) - $150+/night"
+}
+
 const ComprehensiveHotelForm = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -55,11 +60,20 @@ const ComprehensiveHotelForm = () => {
     if (e.target.files) {
       const newImages = Array.from(e.target.files)
       setImages(prev => [...prev, ...newImages])
+      // Reset the input value so the same file can be selected again if needed
+      e.target.value = ''
     }
   }
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const triggerImageUpload = () => {
+    const fileInput = document.getElementById('image-upload') as HTMLInputElement
+    if (fileInput) {
+      fileInput.click()
+    }
   }
 
   const addRoom = () => {
@@ -297,7 +311,9 @@ const ComprehensiveHotelForm = () => {
                       </FormControl>
                       <SelectContent>
                         {Constants.public.Enums.price_range.map(pr => (
-                          <SelectItem key={pr} value={pr}>{pr}</SelectItem>
+                          <SelectItem key={pr} value={pr}>
+                            {priceRangeLabels[pr as keyof typeof priceRangeLabels]}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -317,7 +333,7 @@ const ComprehensiveHotelForm = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <Input
+                <input
                   type="file"
                   multiple
                   accept="image/*"
@@ -325,12 +341,18 @@ const ComprehensiveHotelForm = () => {
                   className="hidden"
                   id="image-upload"
                 />
-                <label htmlFor="image-upload">
-                  <Button type="button" variant="outline" className="cursor-pointer">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Images
-                  </Button>
-                </label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={triggerImageUpload}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  Upload Images
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  {images.length} image{images.length !== 1 ? 's' : ''} selected
+                </span>
               </div>
               
               {images.length > 0 && (
@@ -346,11 +368,16 @@ const ComprehensiveHotelForm = () => {
                         type="button"
                         variant="destructive"
                         size="sm"
-                        className="absolute top-2 right-2"
+                        className="absolute top-2 right-2 h-6 w-6 p-0"
                         onClick={() => removeImage(index)}
                       >
                         <X className="w-3 h-3" />
                       </Button>
+                      {index === 0 && (
+                        <Badge className="absolute bottom-2 left-2 text-xs">
+                          Main Image
+                        </Badge>
+                      )}
                     </div>
                   ))}
                 </div>
