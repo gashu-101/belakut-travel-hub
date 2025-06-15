@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { InsertHotel, InsertHotelRoom, InsertHotelHall, InsertHotelService, InsertHotelImage, InsertBooking, InsertBookingRoom, InsertReview } from "@/types";
 
@@ -326,5 +325,17 @@ export async function getUserHotels() {
     throw new Error(error.message);
   }
 
+  return data;
+}
+
+export async function getExperiences() {
+  console.log("Fetching all experiences...");
+  const { data, error } = await supabase.from("experiences").select("*");
+
+  if (error) {
+    console.error("Error fetching experiences:", error);
+    throw new Error(error.message);
+  }
+  console.log("Fetched experiences:", data);
   return data;
 }

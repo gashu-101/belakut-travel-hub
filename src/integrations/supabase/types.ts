@@ -108,11 +108,13 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
+          description: string | null
           duration: string | null
           id: string
           image: string | null
           location: string | null
           name: string
+          owner_id: string | null
           price_per_guest: number | null
           provider: string | null
           rating: number | null
@@ -120,11 +122,13 @@ export type Database = {
         Insert: {
           category?: string | null
           created_at?: string
+          description?: string | null
           duration?: string | null
           id?: string
           image?: string | null
           location?: string | null
           name: string
+          owner_id?: string | null
           price_per_guest?: number | null
           provider?: string | null
           rating?: number | null
@@ -132,11 +136,13 @@ export type Database = {
         Update: {
           category?: string | null
           created_at?: string
+          description?: string | null
           duration?: string | null
           id?: string
           image?: string | null
           location?: string | null
           name?: string
+          owner_id?: string | null
           price_per_guest?: number | null
           provider?: string | null
           rating?: number | null
