@@ -136,7 +136,11 @@ const ComprehensiveHotelForm = () => {
     try {
       // 1. Create the hotel
       const hotelData: InsertHotel = {
-        ...values,
+        name: values.name,
+        description: values.description,
+        location: values.location,
+        type: values.type,
+        price_range: values.price_range,
         owner_id: user.id,
       }
 
