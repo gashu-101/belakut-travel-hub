@@ -1,0 +1,65 @@
+
+import { Link, NavLink } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Menu, Mountain } from 'lucide-react';
+
+const NavItem = ({ to, children }: { to: string, children: React.ReactNode }) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) =>
+      `text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'}`
+    }
+  >
+    {children}
+  </NavLink>
+);
+
+const Header = () => {
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 max-w-screen-2xl items-center">
+        <div className="mr-4 hidden md:flex">
+          <Link to="/" className="mr-6 flex items-center space-x-2">
+            <Mountain className="h-6 w-6 text-primary" />
+            <span className="hidden font-bold sm:inline-block">Belakut</span>
+          </Link>
+          <nav className="flex items-center gap-6 text-sm">
+            <NavItem to="/">Home</NavItem>
+            <NavItem to="/hotels">Stays</NavItem>
+            <NavItem to="/experiences">Experiences</NavItem>
+          </nav>
+        </div>
+
+        <div className="md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left">
+              <Link to="/" className="mr-6 flex items-center space-x-2 mb-6">
+                <Mountain className="h-6 w-6 text-primary" />
+                <span className="font-bold">Belakut</span>
+              </Link>
+              <div className="flex flex-col gap-4">
+                <NavItem to="/">Home</NavItem>
+                <NavItem to="/hotels">Stays</NavItem>
+                <NavItem to="/experiences">Experiences</NavItem>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          <Button variant="ghost">Log In</Button>
+          <Button>Sign Up</Button>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
