@@ -54,6 +54,8 @@ const HotelDetail = () => {
     );
   }
 
+  console.log('HotelDetail rendering hotel:', hotel.name, 'with image:', hotel.image);
+
   const amenityIcons: { [key: string]: any } = {
     'WiFi': Wifi,
     'Parking': Car,
@@ -76,6 +78,13 @@ const HotelDetail = () => {
               src={hotel.image || '/placeholder.svg'}
               alt={hotel.name}
               className="w-full h-96 object-cover rounded-lg shadow-lg mb-4"
+              onError={(e) => {
+                console.log('Main image failed to load for hotel:', hotel.name);
+                e.currentTarget.src = '/placeholder.svg';
+              }}
+              onLoad={() => {
+                console.log('Main image loaded successfully for hotel:', hotel.name);
+              }}
             />
             
             {hotel.gallery && hotel.gallery.length > 0 && (
@@ -86,6 +95,10 @@ const HotelDetail = () => {
                     src={image}
                     alt={`${hotel.name} gallery ${index + 1}`}
                     className="w-full h-24 object-cover rounded-lg"
+                    onError={(e) => {
+                      console.log(`Gallery image ${index + 1} failed to load for hotel:`, hotel.name);
+                      e.currentTarget.src = '/placeholder.svg';
+                    }}
                   />
                 ))}
               </div>

@@ -9,6 +9,8 @@ interface HotelCardProps {
 }
 
 const HotelCard = ({ hotel }: HotelCardProps) => {
+  console.log('HotelCard rendering hotel:', hotel.name, 'with image:', hotel.image);
+  
   return (
     <Link to={`/hotels/${hotel.id}`} className="group">
       <Card className="overflow-hidden border-0 shadow-lg hover:shadow-primary/20 transition-shadow duration-300">
@@ -18,6 +20,13 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
               src={hotel.image || '/placeholder.svg'} 
               alt={hotel.name}
               className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                console.log('Image failed to load for hotel:', hotel.name);
+                e.currentTarget.src = '/placeholder.svg';
+              }}
+              onLoad={() => {
+                console.log('Image loaded successfully for hotel:', hotel.name);
+              }}
             />
           </div>
           <div className="p-4">
