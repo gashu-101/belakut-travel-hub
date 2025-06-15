@@ -3,6 +3,8 @@ import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Mountain } from 'lucide-react';
+import { useAuth } from '@/providers/AuthProvider';
+import UserNav from '@/components/auth/UserNav';
 
 const NavItem = ({ to, children }: { to: string, children: React.ReactNode }) => (
   <NavLink
@@ -16,6 +18,8 @@ const NavItem = ({ to, children }: { to: string, children: React.ReactNode }) =>
 );
 
 const Header = () => {
+  const { session } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
@@ -54,8 +58,18 @@ const Header = () => {
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <Button variant="ghost">Log In</Button>
-          <Button>Sign Up</Button>
+          {session ? (
+            <UserNav />
+          ) : (
+            <>
+              <Button asChild variant="ghost">
+                <Link to="/auth">Log In</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/auth?mode=signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
