@@ -1,15 +1,37 @@
-
 import { Hotel } from '@/types';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 
 interface HotelCardProps {
-  hotel: Hotel;
+  hotel: Hotel & {
+    hotel_images?: Array<{
+      id: string;
+      image_url: string;
+      image_type: string;
+      sort_order: number;
+    }>;
+  };
 }
 
 const HotelCard = ({ hotel }: HotelCardProps) => {
-  console.log('HotelCard rendering hotel:', hotel.name, 'with image:', hotel.image);
+  // Get the main image from hotel_images or fall back to hotel.image
+  const getMainImage = () => {
+    if (hotel.hotel_images && hotel.hotel_images.length > 0) {
+      // First try to find a main image
+      const mainImage = hotel.hotel_images.find(img => img.image_type === 'main');
+      if (mainImage) return mainImage.image_url;
+      
+      // Otherwise use the first image sorted by sort_order
+      const sortedImages = hotel.hotel_images.sort((a, b) => a.sort_order - b.sort_order);
+      return sortedImages[0].image_url;
+    }
+    
+    return hotel.image || '/placeholder.svg';
+  };
+
+  const imageUrl = getMainImage();
+  console.log('HotelCard rendering hotel:', hotel.name, 'with image:', imageUrl);
   
   return (
     <Link to={`/hotels/${hotel.id}`} className="group">
@@ -17,7 +39,7 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
         <CardContent className="p-0">
           <div className="relative">
             <img 
-              src={hotel.image || '/placeholder.svg'} 
+              src={imageUrl} 
               alt={hotel.name}
               className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
               onError={(e) => {

@@ -1,9 +1,15 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { InsertHotel, InsertHotelRoom, InsertHotelHall, InsertHotelService, InsertHotelImage, InsertBooking, InsertBookingRoom, InsertReview } from "@/types";
 
 export async function getHotels() {
   console.log("Fetching all hotels...");
-  const { data, error } = await supabase.from("hotels").select("*");
+  const { data, error } = await supabase
+    .from("hotels")
+    .select(`
+      *,
+      hotel_images(*)
+    `);
 
   if (error) {
     console.error("Error fetching hotels:", error);
@@ -17,7 +23,10 @@ export async function searchHotels(query: string) {
   console.log("Searching hotels with query:", query);
   const { data, error } = await supabase
     .from("hotels")
-    .select("*")
+    .select(`
+      *,
+      hotel_images(*)
+    `)
     .or(`name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`);
 
   if (error) {
@@ -45,7 +54,13 @@ export async function searchExperiences(query: string) {
 
 export async function getFeaturedHotels() {
   console.log("Fetching featured hotels...");
-  const { data, error } = await supabase.from("hotels").select("*").limit(4);
+  const { data, error } = await supabase
+    .from("hotels")
+    .select(`
+      *,
+      hotel_images(*)
+    `)
+    .limit(4);
 
   if (error) {
     console.error("Error fetching featured hotels:", error);

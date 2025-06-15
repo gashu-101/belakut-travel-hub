@@ -1,4 +1,3 @@
-
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getHotelById } from '@/lib/api';
@@ -54,7 +53,37 @@ const HotelDetail = () => {
     );
   }
 
-  console.log('HotelDetail rendering hotel:', hotel.name, 'with image:', hotel.image);
+  // Get the main image from hotel_images or fall back to hotel.image
+  const getMainImage = () => {
+    if (hotel.hotel_images && hotel.hotel_images.length > 0) {
+      // First try to find a main image
+      const mainImage = hotel.hotel_images.find(img => img.image_type === 'main');
+      if (mainImage) return mainImage.image_url;
+      
+      // Otherwise use the first image sorted by sort_order
+      const sortedImages = hotel.hotel_images.sort((a, b) => a.sort_order - b.sort_order);
+      return sortedImages[0].image_url;
+    }
+    
+    return hotel.image || '/placeholder.svg';
+  };
+
+  // Get gallery images (excluding the main image)
+  const getGalleryImages = () => {
+    if (hotel.hotel_images && hotel.hotel_images.length > 0) {
+      return hotel.hotel_images
+        .filter(img => img.image_type !== 'main')
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(img => img.image_url);
+    }
+    
+    return hotel.gallery || [];
+  };
+
+  const mainImageUrl = getMainImage();
+  const galleryImages = getGalleryImages();
+  
+  console.log('HotelDetail rendering hotel:', hotel.name, 'with main image:', mainImageUrl);
 
   const amenityIcons: { [key: string]: any } = {
     'WiFi': Wifi,
@@ -75,7 +104,7 @@ const HotelDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             <img
-              src={hotel.image || '/placeholder.svg'}
+              src={mainImageUrl}
               alt={hotel.name}
               className="w-full h-96 object-cover rounded-lg shadow-lg mb-4"
               onError={(e) => {
@@ -87,9 +116,9 @@ const HotelDetail = () => {
               }}
             />
             
-            {hotel.gallery && hotel.gallery.length > 0 && (
+            {galleryImages.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
-                {hotel.gallery.slice(0, 3).map((image, index) => (
+                {galleryImages.slice(0, 3).map((image, index) => (
                   <img
                     key={index}
                     src={image}
