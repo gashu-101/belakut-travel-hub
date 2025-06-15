@@ -58,6 +58,7 @@ export type Database = {
           image: string | null
           location: string
           name: string
+          owner_id: string | null
           price_range: Database["public"]["Enums"]["price_range"] | null
           rating: number | null
           type: Database["public"]["Enums"]["hotel_type"] | null
@@ -71,6 +72,7 @@ export type Database = {
           image?: string | null
           location: string
           name: string
+          owner_id?: string | null
           price_range?: Database["public"]["Enums"]["price_range"] | null
           rating?: number | null
           type?: Database["public"]["Enums"]["hotel_type"] | null
@@ -84,6 +86,7 @@ export type Database = {
           image?: string | null
           location?: string
           name?: string
+          owner_id?: string | null
           price_range?: Database["public"]["Enums"]["price_range"] | null
           rating?: number | null
           type?: Database["public"]["Enums"]["hotel_type"] | null

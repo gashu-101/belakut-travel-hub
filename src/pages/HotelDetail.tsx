@@ -23,7 +23,7 @@ const HotelDetail = () => {
   const { data: hotel, isLoading, isError } = useQuery({
     queryKey: ['hotel', id],
     queryFn: () => getHotelById(id!),
-    enabled: !!id,
+    enabled: !!id && id !== ':id',
   });
 
   if (isLoading) {
