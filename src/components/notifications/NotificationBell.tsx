@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, BellRing, Sparkles2 } from 'lucide-react';
+import { Bell, BellRing, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -113,7 +112,7 @@ const NotificationBell = () => {
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center">
-              <Sparkles2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+              <Sparkles className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <p className="text-slate-500 text-sm">No notifications yet</p>
               <p className="text-slate-400 text-xs mt-1">New updates will appear here</p>
             </div>

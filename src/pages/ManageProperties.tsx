@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/providers/AuthProvider';
 import { Navigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -61,29 +60,48 @@ const ManageProperties = () => {
       
       const hotelIds = hotels.map(h => h.id);
       const bookingPromises = hotelIds.map(async (hotelId) => {
-        const { data: bookings, error } = await supabase
+        // First get bookings
+        const { data: bookings, error: bookingsError } = await supabase
           .from('bookings')
-          .select(`
-            *,
-            hotels!inner(name),
-            profiles:user_id(first_name, last_name, email, phone)
-          `)
+          .select('*')
           .eq('hotel_id', hotelId)
           .eq('status', 'pending')
           .eq('payment_approved', false);
 
-        if (error) throw error;
+        if (bookingsError) throw bookingsError;
         
-        return bookings.map(booking => ({
-          ...booking,
-          hotel_name: booking.hotels?.name || 'Unknown Hotel',
-          guest_count: booking.guests_count,
-          booker_name: booking.profiles 
-            ? `${booking.profiles.first_name || ''} ${booking.profiles.last_name || ''}`.trim() || 'Unknown'
-            : 'Unknown',
-          booker_email: booking.profiles?.email || 'Not provided',
-          booker_phone: booking.profiles?.phone || 'Not provided'
-        }));
+        // Then get hotel names
+        const { data: hotelData, error: hotelError } = await supabase
+          .from('hotels')
+          .select('name')
+          .eq('id', hotelId)
+          .single();
+
+        if (hotelError) throw hotelError;
+
+        // Get user profiles for each booking
+        const bookingsWithProfiles = await Promise.all(
+          bookings.map(async (booking) => {
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('first_name, last_name, email, phone')
+              .eq('id', booking.user_id)
+              .maybeSingle();
+
+            return {
+              ...booking,
+              hotel_name: hotelData?.name || 'Unknown Hotel',
+              guest_count: booking.guests_count,
+              booker_name: profile 
+                ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown'
+                : 'Unknown',
+              booker_email: profile?.email || 'Not provided',
+              booker_phone: profile?.phone || 'Not provided'
+            };
+          })
+        );
+        
+        return bookingsWithProfiles;
       });
       
       const bookingResults = await Promise.all(bookingPromises);
@@ -217,24 +235,35 @@ const PropertyCard = ({ hotel, onDelete, isDeleting }: {
   const { data: bookings } = useQuery({
     queryKey: ['hotel-bookings', hotel.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get bookings
+      const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
-        .select(`
-          *,
-          profiles:user_id(first_name, last_name, email, phone)
-        `)
+        .select('*')
         .eq('hotel_id', hotel.id);
 
-      if (error) throw error;
+      if (bookingsError) throw bookingsError;
       
-      return data.map(booking => ({
-        ...booking,
-        booker_name: booking.profiles 
-          ? `${booking.profiles.first_name || ''} ${booking.profiles.last_name || ''}`.trim() || 'Unknown'
-          : 'Unknown',
-        booker_email: booking.profiles?.email || 'Not provided',
-        booker_phone: booking.profiles?.phone || 'Not provided'
-      }));
+      // Get user profiles for each booking
+      const bookingsWithProfiles = await Promise.all(
+        bookings.map(async (booking) => {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, email, phone')
+            .eq('id', booking.user_id)
+            .maybeSingle();
+
+          return {
+            ...booking,
+            booker_name: profile 
+              ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown'
+              : 'Unknown',
+            booker_email: profile?.email || 'Not provided',
+            booker_phone: profile?.phone || 'Not provided'
+          };
+        })
+      );
+      
+      return bookingsWithProfiles;
     },
   });
 
