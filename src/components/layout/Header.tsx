@@ -2,9 +2,10 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Mountain, Plus } from 'lucide-react';
+import { Menu, Mountain, Plus, Settings } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import UserNav from '@/components/auth/UserNav';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const NavItem = ({ to, children }: { to: string, children: React.ReactNode }) => (
   <NavLink
@@ -32,6 +33,9 @@ const Header = () => {
             <NavItem to="/">Home</NavItem>
             <NavItem to="/hotels">Stays</NavItem>
             <NavItem to="/experiences">Experiences</NavItem>
+            {session && (
+              <NavItem to="/manage-properties">Manage Properties</NavItem>
+            )}
           </nav>
         </div>
 
@@ -53,7 +57,10 @@ const Header = () => {
                 <NavItem to="/hotels">Stays</NavItem>
                 <NavItem to="/experiences">Experiences</NavItem>
                 {session && (
-                  <NavItem to="/add-hotel">Add Property</NavItem>
+                  <>
+                    <NavItem to="/add-hotel">Add Property</NavItem>
+                    <NavItem to="/manage-properties">Manage Properties</NavItem>
+                  </>
                 )}
               </div>
             </SheetContent>
@@ -61,12 +68,19 @@ const Header = () => {
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
+          <ThemeToggle />
           {session ? (
             <div className="flex items-center gap-2">
               <Button asChild variant="outline" size="sm">
                 <Link to="/add-hotel">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Property
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/manage-properties">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Manage
                 </Link>
               </Button>
               <UserNav />

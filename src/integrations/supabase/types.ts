@@ -9,6 +9,101 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      booking_rooms: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          price_per_night: number | null
+          quantity: number
+          room_id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          price_per_night?: number | null
+          quantity?: number
+          room_id: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          price_per_night?: number | null
+          quantity?: number
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_rooms_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_rooms_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "hotel_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          booking_type: string
+          check_in_date: string
+          check_out_date: string
+          created_at: string
+          guests_count: number
+          hotel_id: string
+          id: string
+          special_requests: string | null
+          status: string
+          total_amount: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_type: string
+          check_in_date: string
+          check_out_date: string
+          created_at?: string
+          guests_count?: number
+          hotel_id: string
+          id?: string
+          special_requests?: string | null
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_type?: string
+          check_in_date?: string
+          check_out_date?: string
+          created_at?: string
+          guests_count?: number
+          hotel_id?: string
+          id?: string
+          special_requests?: string | null
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiences: {
         Row: {
           category: string | null

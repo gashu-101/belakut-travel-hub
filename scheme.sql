@@ -1,4 +1,3 @@
-
 -- Create an enum type for hotel types for consistency
 CREATE TYPE public.hotel_type AS ENUM ('Hotel', 'Resort', 'Lodge', 'Guesthouse');
 
@@ -88,3 +87,6 @@ CREATE POLICY "Allow hotel owners to delete their own hotels"
 ON public.hotels 
 FOR DELETE USING (auth.uid() = owner_id);
 
+-- Add missing foreign key constraint for user_id in bookings table
+ALTER TABLE public.bookings ADD CONSTRAINT bookings_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;

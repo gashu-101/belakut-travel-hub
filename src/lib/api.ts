@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { InsertHotel, InsertHotelRoom, InsertHotelHall, InsertHotelService, InsertHotelImage } from "@/types";
+import { InsertHotel, InsertHotelRoom, InsertHotelHall, InsertHotelService, InsertHotelImage, InsertBooking, InsertBookingRoom, InsertReview } from "@/types";
 
 export async function getHotels() {
   console.log("Fetching all hotels...");
@@ -155,6 +154,144 @@ export async function addHotelImage(imageData: InsertHotelImage) {
 
   if (error) {
     console.error("Error adding hotel image:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// Booking functions
+export async function createBooking(bookingData: InsertBooking) {
+  console.log("Creating booking:", bookingData);
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error("User must be authenticated to create bookings");
+  }
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .insert({ ...bookingData, user_id: user.id })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating booking:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function addBookingRoom(roomData: InsertBookingRoom) {
+  const { data, error } = await supabase
+    .from("booking_rooms")
+    .insert(roomData)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error adding booking room:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function getUserBookings() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error("User must be authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(`
+      *,
+      hotels(name, image, location),
+      booking_rooms(*, hotel_rooms(room_type))
+    `)
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching user bookings:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function getHotelBookings(hotelId: string) {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(`
+      *,
+      booking_rooms(*, hotel_rooms(room_type))
+    `)
+    .eq("hotel_id", hotelId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching hotel bookings:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// Review functions
+export async function addReview(reviewData: InsertReview) {
+  console.log("Adding review:", reviewData);
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error("User must be authenticated to add reviews");
+  }
+
+  const { data, error } = await supabase
+    .from("reviews")
+    .insert({ ...reviewData, user_id: user.id })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error adding review:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function getHotelReviews(hotelId: string) {
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("hotel_id", hotelId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching hotel reviews:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function getUserHotels() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error("User must be authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from("hotels")
+    .select("*")
+    .eq("owner_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching user hotels:", error);
     throw new Error(error.message);
   }
 
