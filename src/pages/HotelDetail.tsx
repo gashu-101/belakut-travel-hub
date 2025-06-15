@@ -1,21 +1,29 @@
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getHotelById } from '@/lib/api';
+import { getHotelById, getHotelReviews } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { MapPin, Star, Wifi, Car, Utensils, ArrowLeft } from 'lucide-react';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { MapPin, Star, Wifi, Car, Utensils, ArrowLeft, User } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import BookingDialog from '@/components/booking/BookingDialog';
 import ReviewDialog from '@/components/reviews/ReviewDialog';
+import { useState } from 'react';
 
 const HotelDetail = () => {
   const { id } = useParams();
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const { data: hotel, isLoading, error } = useQuery({
     queryKey: ['hotel', id],
     queryFn: () => getHotelById(id!),
+    enabled: !!id,
+  });
+
+  const { data: reviews } = useQuery({
+    queryKey: ['hotel-reviews', id],
+    queryFn: () => getHotelReviews(id!),
     enabled: !!id,
   });
 
@@ -56,11 +64,9 @@ const HotelDetail = () => {
   // Get the main image from hotel_images or fall back to hotel.image
   const getMainImage = () => {
     if (hotel.hotel_images && hotel.hotel_images.length > 0) {
-      // First try to find a main image
       const mainImage = hotel.hotel_images.find(img => img.image_type === 'main');
       if (mainImage) return mainImage.image_url;
       
-      // Otherwise use the first image sorted by sort_order
       const sortedImages = hotel.hotel_images.sort((a, b) => a.sort_order - b.sort_order);
       return sortedImages[0].image_url;
     }
@@ -68,11 +74,10 @@ const HotelDetail = () => {
     return hotel.image || '/placeholder.svg';
   };
 
-  // Get gallery images (excluding the main image)
-  const getGalleryImages = () => {
+  // Get all images for gallery
+  const getAllImages = () => {
     if (hotel.hotel_images && hotel.hotel_images.length > 0) {
       return hotel.hotel_images
-        .filter(img => img.image_type !== 'main')
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(img => img.image_url);
     }
@@ -81,15 +86,17 @@ const HotelDetail = () => {
   };
 
   const mainImageUrl = getMainImage();
-  const galleryImages = getGalleryImages();
+  const allImages = getAllImages();
   
-  console.log('HotelDetail rendering hotel:', hotel.name, 'with main image:', mainImageUrl);
-
   const amenityIcons: { [key: string]: any } = {
     'WiFi': Wifi,
     'Parking': Car,
     'Restaurant': Utensils,
   };
+
+  const averageRating = reviews && reviews.length > 0 
+    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+    : null;
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -103,32 +110,56 @@ const HotelDetail = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
-            <img
-              src={mainImageUrl}
-              alt={hotel.name}
-              className="w-full h-96 object-cover rounded-lg shadow-lg mb-4"
-              onError={(e) => {
-                console.log('Main image failed to load for hotel:', hotel.name);
-                e.currentTarget.src = '/placeholder.svg';
-              }}
-              onLoad={() => {
-                console.log('Main image loaded successfully for hotel:', hotel.name);
-              }}
-            />
-            
-            {galleryImages.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
-                {galleryImages.slice(0, 3).map((image, index) => (
+            <Dialog>
+              <DialogTrigger asChild>
+                <img
+                  src={mainImageUrl}
+                  alt={hotel.name}
+                  className="w-full h-96 object-cover rounded-lg shadow-lg mb-4 cursor-pointer hover:opacity-90 transition-opacity"
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder.svg';
+                  }}
+                />
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <div className="relative">
                   <img
-                    key={index}
-                    src={image}
-                    alt={`${hotel.name} gallery ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-lg"
-                    onError={(e) => {
-                      console.log(`Gallery image ${index + 1} failed to load for hotel:`, hotel.name);
-                      e.currentTarget.src = '/placeholder.svg';
-                    }}
+                    src={allImages[selectedImageIndex] || mainImageUrl}
+                    alt={`${hotel.name} - Image ${selectedImageIndex + 1}`}
+                    className="w-full h-96 object-cover rounded-lg"
                   />
+                  {allImages.length > 1 && (
+                    <div className="flex justify-center mt-4 gap-2">
+                      {allImages.map((image, index) => (
+                        <img
+                          key={index}
+                          src={image}
+                          alt={`${hotel.name} thumbnail ${index + 1}`}
+                          className={`w-16 h-16 object-cover rounded cursor-pointer ${
+                            selectedImageIndex === index ? 'ring-2 ring-primary' : ''
+                          }`}
+                          onClick={() => setSelectedImageIndex(index)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            {allImages.length > 1 && (
+              <div className="grid grid-cols-4 gap-2">
+                {allImages.slice(1, 5).map((image, index) => (
+                  <Dialog key={index}>
+                    <DialogTrigger asChild>
+                      <img
+                        src={image}
+                        alt={`${hotel.name} gallery ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => setSelectedImageIndex(index + 1)}
+                      />
+                    </DialogTrigger>
+                  </Dialog>
                 ))}
               </div>
             )}
@@ -140,7 +171,14 @@ const HotelDetail = () => {
                 <h1 className="text-3xl font-bold">{hotel.name}</h1>
                 <div className="flex items-center gap-1">
                   <Star className="w-5 h-5 text-primary fill-current" />
-                  <span className="text-lg font-medium">{hotel.rating || 'N/A'}</span>
+                  <span className="text-lg font-medium">
+                    {averageRating || hotel.rating || 'N/A'}
+                  </span>
+                  {reviews && reviews.length > 0 && (
+                    <span className="text-sm text-muted-foreground ml-1">
+                      ({reviews.length} reviews)
+                    </span>
+                  )}
                 </div>
               </div>
               
@@ -191,12 +229,43 @@ const HotelDetail = () => {
               <BookingDialog hotel={hotel}>
                 <Button size="lg" className="flex-1">Book Now</Button>
               </BookingDialog>
-              <ReviewDialog hotel={hotel}>
+              <ReviewDialog hotel={hotel} onReviewAdded={() => window.location.reload()}>
                 <Button variant="outline" size="lg">Add Review</Button>
               </ReviewDialog>
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        {reviews && reviews.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-6">Reviews</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {reviews.map((review) => (
+                <Card key={review.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span className="font-medium">Guest</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span>{review.rating}</span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">{review.comment}</p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {new Date(review.created_at).toLocaleDateString()}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Rooms Section */}
         {hotel.hotel_rooms && hotel.hotel_rooms.length > 0 && (

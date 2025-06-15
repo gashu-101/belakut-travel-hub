@@ -18,6 +18,8 @@ import AddHotel from "./pages/AddHotel";
 import AddExperience from "./pages/AddExperience";
 import ManageProperties from "./pages/ManageProperties";
 import ManageExperiences from "./pages/ManageExperiences";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCallback from "./pages/PaymentCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,8 @@ const App = () => (
                 <Route path="add-experience" element={<AddExperience />} />
                 <Route path="manage-properties" element={<ManageProperties />} />
                 <Route path="manage-experiences" element={<ManageExperiences />} />
+                <Route path="payment/success" element={<PaymentSuccess />} />
+                <Route path="payment/callback" element={<PaymentCallback />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
