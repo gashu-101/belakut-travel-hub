@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, BellRing, Heart, Sparkles } from 'lucide-react';
+import { Bell, BellRing, Sparkles2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -46,13 +46,13 @@ const NotificationBell = () => {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'booking':
-        return '🏨';
+        return 'Hotel';
       case 'payment':
-        return '💳';
+        return 'Payment';
       case 'warning':
-        return '⚠️';
+        return 'Warning';
       default:
-        return '📢';
+        return 'Info';
     }
   };
 
@@ -70,30 +70,27 @@ const NotificationBell = () => {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative group hover:bg-purple-50 transition-all duration-300">
+        <Button variant="ghost" size="icon" className="relative group hover:bg-slate-100 transition-all duration-300">
           {unreadCount > 0 ? (
-            <BellRing className="h-5 w-5 text-purple-600 animate-pulse" />
+            <BellRing className="h-5 w-5 text-blue-600 animate-pulse" />
           ) : (
-            <Bell className="h-5 w-5 text-gray-600 group-hover:text-purple-600 transition-colors" />
+            <Bell className="h-5 w-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
           )}
           {unreadCount > 0 && (
             <Badge 
               variant="destructive" 
-              className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs animate-bounce bg-gradient-to-r from-pink-500 to-red-500"
+              className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs bg-gradient-to-r from-red-500 to-red-600 border-0"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
           )}
-          {unreadCount > 0 && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-400 rounded-full animate-ping opacity-75" />
-          )}
         </Button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent align="end" className="w-80 bg-white/95 backdrop-blur border-0 shadow-2xl">
-        <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-50 to-pink-50">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-            <Heart className="w-4 h-4 text-red-500" />
+      <DropdownMenuContent align="end" className="w-80 bg-white border-0 shadow-2xl rounded-xl">
+        <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-slate-50 to-slate-100 rounded-t-xl">
+          <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+            <Bell className="w-4 h-4 text-blue-600" />
             Notifications
           </h3>
           {unreadCount > 0 && (
@@ -101,9 +98,9 @@ const NotificationBell = () => {
               variant="ghost" 
               size="sm" 
               onClick={handleMarkAllAsRead}
-              className="text-xs hover:bg-white/80 transition-colors"
+              className="text-xs hover:bg-white transition-colors"
             >
-              ✨ Mark all read
+              Mark all read
             </Button>
           )}
         </div>
@@ -111,14 +108,14 @@ const NotificationBell = () => {
         <div className="max-h-96 overflow-y-auto">
           {isLoading ? (
             <div className="p-4 text-center">
-              <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <p className="text-sm text-gray-500">Loading magical updates...</p>
+              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-sm text-slate-500">Loading notifications...</p>
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center">
-              <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-sm">No notifications yet!</p>
-              <p className="text-gray-400 text-xs mt-1">We'll let you know when something exciting happens ✨</p>
+              <Sparkles2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-500 text-sm">No notifications yet</p>
+              <p className="text-slate-400 text-xs mt-1">New updates will appear here</p>
             </div>
           ) : (
             notifications.map((notification) => (
@@ -126,33 +123,35 @@ const NotificationBell = () => {
                 key={notification.id}
                 className={`p-4 cursor-pointer border-b last:border-b-0 transition-all duration-300 ${
                   !notification.read 
-                    ? 'bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100' 
-                    : 'hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-blue-50 to-slate-50 hover:from-blue-100 hover:to-slate-100' 
+                    : 'hover:bg-slate-50'
                 }`}
                 onClick={() => handleMarkAsRead(notification.id)}
               >
                 <div className="flex items-start gap-3 w-full">
-                  <div className="text-2xl flex-shrink-0">
-                    {getNotificationIcon(notification.type)}
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-medium">
+                      {getNotificationIcon(notification.type).charAt(0)}
+                    </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium text-sm text-gray-800 truncate">
+                      <h4 className="font-medium text-sm text-slate-800 truncate">
                         {notification.title}
                       </h4>
                       {!notification.read && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 animate-pulse" />
+                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
                       )}
                     </div>
-                    <p className="text-xs text-gray-600 leading-relaxed mb-2">
+                    <p className="text-xs text-slate-600 leading-relaxed mb-2">
                       {notification.message}
                     </p>
                     {notification.metadata && notification.metadata.total_amount && (
                       <div className="text-xs font-semibold text-green-600 mb-1">
-                        💰 {formatETB(notification.metadata.total_amount)}
+                        {formatETB(notification.metadata.total_amount)}
                       </div>
                     )}
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-slate-400">
                       {formatNotificationTime(notification.created_at)}
                     </p>
                   </div>
@@ -165,14 +164,14 @@ const NotificationBell = () => {
         {notifications.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            <div className="p-2 bg-gradient-to-r from-purple-50 to-pink-50">
+            <div className="p-2 bg-gradient-to-r from-slate-50 to-slate-100 rounded-b-xl">
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="w-full text-xs hover:bg-white/80 transition-colors"
+                className="w-full text-xs hover:bg-white transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                🎯 View All Notifications
+                View All Notifications
               </Button>
             </div>
           </>
