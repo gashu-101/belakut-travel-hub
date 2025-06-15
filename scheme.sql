@@ -67,3 +67,24 @@ CREATE POLICY "Allow users to update their own reviews" ON public.reviews FOR UP
 -- Allow users to delete their own reviews
 CREATE POLICY "Allow users to delete their own reviews" ON public.reviews FOR DELETE USING (auth.uid() = user_id);
 
+
+
+-- Add owner_id to hotels table to link hotels to users
+ALTER TABLE public.hotels ADD COLUMN owner_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+
+-- Add RLS policies for hotel owners
+-- This policy allows authenticated users to add new hotels, ensuring they set themselves as the owner.
+CREATE POLICY "Allow authenticated users to insert hotels" 
+ON public.hotels 
+FOR INSERT WITH CHECK (auth.uid() = owner_id);
+
+-- This policy allows hotel owners to update their own hotel listings.
+CREATE POLICY "Allow hotel owners to update their own hotels" 
+ON public.hotels 
+FOR UPDATE USING (auth.uid() = owner_id) WITH CHECK (auth.uid() = owner_id);
+
+-- This policy allows hotel owners to delete their own hotel listings.
+CREATE POLICY "Allow hotel owners to delete their own hotels" 
+ON public.hotels 
+FOR DELETE USING (auth.uid() = owner_id);
+
