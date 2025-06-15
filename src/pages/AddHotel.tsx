@@ -1,6 +1,6 @@
 
 import { useAuth } from '@/providers/AuthProvider';
-import AddHotelForm from '@/components/hotel/AddHotelForm';
+import ComprehensiveHotelForm from '@/components/hotel/ComprehensiveHotelForm';
 import { Navigate } from 'react-router-dom';
 
 const AddHotel = () => {
@@ -12,9 +12,12 @@ const AddHotel = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Add Your Property</h1>
-        <AddHotelForm />
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8">Add Your Hotel Property</h1>
+        <p className="text-muted-foreground mb-8">
+          Create a comprehensive listing for your hotel with rooms, halls, services, and images.
+        </p>
+        <ComprehensiveHotelForm />
       </div>
     </div>
   );

@@ -48,6 +48,164 @@ export type Database = {
         }
         Relationships: []
       }
+      hotel_halls: {
+        Row: {
+          accommodation_limit: string | null
+          additional_services: string[] | null
+          created_at: string
+          hall_type: Database["public"]["Enums"]["hall_type"]
+          hotel_id: string | null
+          id: string
+          price: number | null
+        }
+        Insert: {
+          accommodation_limit?: string | null
+          additional_services?: string[] | null
+          created_at?: string
+          hall_type: Database["public"]["Enums"]["hall_type"]
+          hotel_id?: string | null
+          id?: string
+          price?: number | null
+        }
+        Update: {
+          accommodation_limit?: string | null
+          additional_services?: string[] | null
+          created_at?: string
+          hall_type?: Database["public"]["Enums"]["hall_type"]
+          hotel_id?: string | null
+          id?: string
+          price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_halls_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_images: {
+        Row: {
+          caption: string | null
+          created_at: string
+          hotel_id: string | null
+          id: string
+          image_type: string | null
+          image_url: string
+          sort_order: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          hotel_id?: string | null
+          id?: string
+          image_type?: string | null
+          image_url: string
+          sort_order?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          hotel_id?: string | null
+          id?: string
+          image_type?: string | null
+          image_url?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_images_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_rooms: {
+        Row: {
+          additional_services: string[] | null
+          created_at: string
+          features: string[] | null
+          hotel_id: string | null
+          id: string
+          price: number | null
+          room_type: Database["public"]["Enums"]["room_type"]
+          total_numbers: number
+        }
+        Insert: {
+          additional_services?: string[] | null
+          created_at?: string
+          features?: string[] | null
+          hotel_id?: string | null
+          id?: string
+          price?: number | null
+          room_type: Database["public"]["Enums"]["room_type"]
+          total_numbers?: number
+        }
+        Update: {
+          additional_services?: string[] | null
+          created_at?: string
+          features?: string[] | null
+          hotel_id?: string | null
+          id?: string
+          price?: number | null
+          room_type?: Database["public"]["Enums"]["room_type"]
+          total_numbers?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_rooms_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_services: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: string[] | null
+          hotel_id: string | null
+          id: string
+          price: number | null
+          service_category: Database["public"]["Enums"]["service_category"]
+          service_name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features?: string[] | null
+          hotel_id?: string | null
+          id?: string
+          price?: number | null
+          service_category: Database["public"]["Enums"]["service_category"]
+          service_name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: string[] | null
+          hotel_id?: string | null
+          id?: string
+          price?: number | null
+          service_category?: Database["public"]["Enums"]["service_category"]
+          service_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_services_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hotels: {
         Row: {
           amenities: string[] | null
@@ -149,8 +307,26 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      hall_type: "Meeting Rooms" | "Conference Rooms" | "Banquet Room"
       hotel_type: "Hotel" | "Resort" | "Lodge" | "Guesthouse"
       price_range: "$$" | "$$$" | "$$$$"
+      room_type:
+        | "Standard Rooms"
+        | "Deluxe Rooms"
+        | "Suites"
+        | "Family Rooms"
+        | "Bridal Rooms"
+      service_category:
+        | "Restaurants"
+        | "Spa/Massage"
+        | "Swimming Pools"
+        | "Game zones"
+        | "Shops"
+        | "Gym"
+        | "Parking"
+        | "Boating"
+        | "Transportation"
+        | "Wifi"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -266,8 +442,28 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      hall_type: ["Meeting Rooms", "Conference Rooms", "Banquet Room"],
       hotel_type: ["Hotel", "Resort", "Lodge", "Guesthouse"],
       price_range: ["$$", "$$$", "$$$$"],
+      room_type: [
+        "Standard Rooms",
+        "Deluxe Rooms",
+        "Suites",
+        "Family Rooms",
+        "Bridal Rooms",
+      ],
+      service_category: [
+        "Restaurants",
+        "Spa/Massage",
+        "Swimming Pools",
+        "Game zones",
+        "Shops",
+        "Gym",
+        "Parking",
+        "Boating",
+        "Transportation",
+        "Wifi",
+      ],
     },
   },
 } as const
