@@ -2,7 +2,7 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Mountain } from 'lucide-react';
+import { Menu, Mountain, Plus } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import UserNav from '@/components/auth/UserNav';
 
@@ -52,6 +52,9 @@ const Header = () => {
                 <NavItem to="/">Home</NavItem>
                 <NavItem to="/hotels">Stays</NavItem>
                 <NavItem to="/experiences">Experiences</NavItem>
+                {session && (
+                  <NavItem to="/add-hotel">Add Property</NavItem>
+                )}
               </div>
             </SheetContent>
           </Sheet>
@@ -59,7 +62,15 @@ const Header = () => {
 
         <div className="flex flex-1 items-center justify-end space-x-2">
           {session ? (
-            <UserNav />
+            <div className="flex items-center gap-2">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/add-hotel">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Property
+                </Link>
+              </Button>
+              <UserNav />
+            </div>
           ) : (
             <>
               <Button asChild variant="ghost">
