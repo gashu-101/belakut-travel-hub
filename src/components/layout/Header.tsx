@@ -26,7 +26,7 @@ const Header = () => {
         <div className="mr-4 hidden md:flex">
           <Link to="/" className="mr-6 flex items-center space-x-2">
             <Mountain className="h-6 w-6 text-primary" />
-            <span className="hidden font-bold sm:inline-block">Belakut</span>
+            <span className="hidden font-bold sm:inline-block">Visitopia</span>
           </Link>
           <nav className="flex items-center gap-6 text-sm">
             <NavItem to="/">Home</NavItem>
@@ -46,7 +46,7 @@ const Header = () => {
             <SheetContent side="left">
               <Link to="/" className="mr-6 flex items-center space-x-2 mb-6">
                 <Mountain className="h-6 w-6 text-primary" />
-                <span className="font-bold">Belakut</span>
+                <span className="font-bold">Visitopia</span>
               </Link>
               <div className="flex flex-col gap-4">
                 <NavItem to="/">Home</NavItem>

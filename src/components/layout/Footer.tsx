@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0">
           <div className="flex items-center space-x-2">
             <Mountain className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg">Belakut</span>
+            <span className="font-bold text-lg">Visitopia</span>
           </div>
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             <Link to="/about" className="text-sm text-muted-foreground hover:text-primary">About Us</Link>
@@ -18,7 +18,7 @@ const Footer = () => {
             <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link>
           </nav>
           <div className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Belakut. All rights reserved.
+            &copy; {new Date().getFullYear()} Visitopia. All rights reserved.
           </div>
         </div>
       </div>
